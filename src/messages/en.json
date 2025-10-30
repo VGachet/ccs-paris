@@ -1,0 +1,54 @@
+{
+  "common": {
+    "home": "Home",
+    "services": "Services",
+    "blog": "Blog",
+    "reservations": "Reservations",
+    "contact": "Contact",
+    "language": "Language",
+    "french": "Français",
+    "english": "English"
+  },
+  "hero": {
+    "title": "Professional Textile Cleaning in Paris",
+    "subtitle": "Quality services for your carpets, sofas and more",
+    "cta": "Get a free quote"
+  },
+  "services": {
+    "title": "Our Services",
+    "description": "Discover our complete range of textile cleaning services",
+    "carpetCleaning": "Carpet Cleaning",
+    "sofaCleaning": "Sofa Cleaning",
+    "autoSeats": "Auto Seat Cleaning",
+    "other": "Other services"
+  },
+  "booking": {
+    "title": "Request a Reservation",
+    "description": "Fill in the form to get a free quote",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "service": "Service",
+    "date": "Preferred date",
+    "message": "Message (optional)",
+    "selectService": "Select a service",
+    "submit": "Send my request",
+    "sending": "Sending...",
+    "success": "✓ Your request has been sent successfully! We will contact you within 24 hours.",
+    "error": "✗ An error occurred"
+  },
+  "blog": {
+    "title": "Blog",
+    "latestArticles": "Latest articles",
+    "readMore": "Read more",
+    "publishedOn": "Published on",
+    "by": "by",
+    "relatedArticles": "Related articles"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "followUs": "Follow us",
+    "contact": "Contact us"
+  }
+}

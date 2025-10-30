@@ -1,0 +1,28 @@
+.languageSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.link {
+  text-decoration: none;
+  color: #1a1a1a;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.link:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: #d4af37;
+}
+
+.link.active {
+  font-weight: 600;
+  color: #d4af37;
+}
+
+.separator {
+  color: #ddd;
+}

@@ -1,66 +1,141 @@
-# Payload Blank Template
+# CCS Paris - Site Web Vitrine
 
-This template comes configured with the bare minimum to get started on anything you need.
+Site web vitrine pour **CCS Paris**, entreprise spécialisée dans le nettoyage textile professionnel à Paris. Le site permet de présenter les services, publier des articles de blog et gérer les demandes de réservation.
 
-## Quick start
+## 🚀 Fonctionnalités
 
-This template can be deployed directly from our Cloud hosting and it will setup MongoDB and cloud S3 object storage for media.
+- **CMS Administrable** : Gestion complète du contenu via Payload CMS
+- **Multilingue** : Interface disponible en Français et Anglais (next-intl)
+- **Blog** : Publication d'articles avec images et SEO optimisé
+- **Services** : Présentation des services de nettoyage textile
+- **Réservations** : Formulaire de demande de devis sans paiement
+- **Design Épuré** : Interface moderne et responsive
+- **SEO Ready** : Métadonnées, sitemap et structure optimisée
 
-## Quick Start - local setup
+## 🛠 Stack Technique
 
-To spin up this template locally, follow these steps:
+- **Framework** : Next.js 15 (App Router)
+- **CMS** : Payload CMS 3.x
+- **Base de données** : MongoDB
+- **i18n** : next-intl
+- **Styling** : CSS Modules
+- **TypeScript** : Full type-safety
+- **Déploiement** : Compatible Vercel/Netlify
 
-### Clone
+## 📦 Installation
 
-After you click the `Deploy` button above, you'll want to have standalone copy of this repo on your machine. If you've already cloned this repo, skip to [Development](#development).
+### Prérequis
 
-### Development
+- Node.js 18+ ou 20+
+- MongoDB (local ou Atlas)
+- npm/pnpm/yarn
 
-1. First [clone the repo](#clone) if you have not done so already
-2. `cd my-project && cp .env.example .env` to copy the example environment variables. You'll need to add the `MONGODB_URI` from your Cloud project to your `.env` if you want to use S3 storage and the MongoDB database that was created for you.
+### Configuration
 
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. open `http://localhost:3000` to open the app in your browser
+1. **Cloner le projet**
+```bash
+git clone https://github.com/VGachet/ccs-paris.git
+cd ccs-paris-website
+```
 
-That's it! Changes made in `./src` will be reflected in your app. Follow the on-screen instructions to login and create your first admin user. Then check out [Production](#production) once you're ready to build and serve your app, and [Deployment](#deployment) when you're ready to go live.
+2. **Installer les dépendances**
+```bash
+npm install
+```
 
-#### Docker (Optional)
+3. **Configurer les variables d'environnement**
 
-If you prefer to use Docker for local development instead of a local MongoDB instance, the provided docker-compose.yml file can be used.
+Créer un fichier `.env` à la racine :
+```env
+DATABASE_URI=mongodb://localhost:27017/ccs-paris
+PAYLOAD_SECRET=your-secret-key-here
+NEXT_PUBLIC_SERVER_URL=http://localhost:3000
+```
 
-To do so, follow these steps:
+⚠️ **Important** : Ne jamais commit le fichier `.env` avec de vraies credentials
 
-- Modify the `MONGODB_URI` in your `.env` file to `mongodb://127.0.0.1/<dbname>`
-- Modify the `docker-compose.yml` file's `MONGODB_URI` to match the above `<dbname>`
-- Run `docker-compose up` to start the database, optionally pass `-d` to run in the background.
+4. **Lancer le serveur de développement**
+```bash
+npm run dev
+```
 
-## How it works
+Accéder à :
+- Site : http://localhost:3000
+- Admin : http://localhost:3000/admin
 
-The Payload config is tailored specifically to the needs of most websites. It is pre-configured in the following ways:
+## 📚 Collections Payload CMS
 
-### Collections
+### Pages
+Pages administrables avec éditeur riche (texte, images, vidéos)
 
-See the [Collections](https://payloadcms.com/docs/configuration/collections) docs for details on how to extend this functionality.
+### Blog
+Articles de blog avec :
+- Titre, slug, contenu riche
+- Image à la une
+- Métadonnées SEO
+- Date de publication
 
-- #### Users (Authentication)
+### Services
+Services de nettoyage textile :
+- Nom, description
+- Image
+- Tarification
 
-  Users are auth-enabled collections that have access to the admin panel.
+### Bookings
+Demandes de réservation :
+- Informations client
+- Service demandé
+- Date souhaitée
+- Statut (en attente, contacté, complété)
 
-  For additional help, see the official [Auth Example](https://github.com/payloadcms/payload/tree/main/examples/auth) or the [Authentication](https://payloadcms.com/docs/authentication/overview#authentication-overview) docs.
+### Media
+Gestion des médias (images, vidéos)
 
-- #### Media
+## 🌍 Internationalisation
 
-  This is the uploads enabled collection. It features pre-configured sizes, focal point and manual resizing to help you manage your pictures.
+Le site est disponible en 2 langues :
+- Français (par défaut)
+- Anglais
 
-### Docker
+Routes générées automatiquement :
+- `/fr/...` - Version française
+- `/en/...` - Version anglaise
 
-Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
+## 🚢 Déploiement
 
-1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
-1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
+### Vercel (Recommandé)
 
-That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+1. Connecter le repo GitHub à Vercel
+2. Configurer les variables d'environnement
+3. Déployer automatiquement
+
+### Build de production
+
+```bash
+npm run build
+npm start
+```
+
+## 📝 Scripts disponibles
+
+```bash
+npm run dev          # Développement
+npm run build        # Build production
+npm start            # Serveur production
+npm run lint         # Linter
+npm run generate:types  # Générer types Payload
+```
+
+## 🔒 Sécurité
+
+- Aucune credential dans le code source
+- Variables d'environnement pour les secrets
+- Access control sur les collections Payload
+- Validation des données côté serveur
+
+## 📄 Licence
+
+MIT
 
 ## Questions
 
