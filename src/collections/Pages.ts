@@ -38,6 +38,49 @@ export const Pages: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor(),
     },
+    {
+      name: 'sections',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'whyChooseUs',
+          labels: {
+            singular: 'Pourquoi nous choisir',
+            plural: 'Pourquoi nous choisir',
+          },
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              defaultValue: 'Pourquoi nous choisir ?',
+            },
+            {
+              name: 'features',
+              type: 'array',
+              minRows: 1,
+              maxRows: 6,
+              fields: [
+                {
+                  name: 'icon',
+                  type: 'text',
+                  defaultValue: '✓',
+                },
+                {
+                  name: 'title',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  required: true,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: {
     drafts: { autosave: true },

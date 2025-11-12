@@ -25,7 +25,7 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/blog-posts')
+        const response = await fetch('/api/public/blog-posts')
         const data = await response.json()
         setPosts(data || [])
       } catch (error) {
@@ -64,9 +64,9 @@ export default function BlogPage() {
                       {new Date(post.publishedAt).toLocaleDateString(locale)}
                     </p>
                     <p style={{ margin: '0 0 1rem 0', color: '#666' }}>{post.excerpt}</p>
-                    <a href={`/${locale}/blog/${post.slug}`} style={{ color: '#d4af37', fontWeight: '600' }}>
+                    <span style={{ color: '#d4af37', fontWeight: '600' }}>
                       {t('readMore')}
-                    </a>
+                    </span>
                   </div>
                 </article>
               </Link>

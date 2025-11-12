@@ -73,6 +73,7 @@ export interface Config {
     services: Service;
     blog: Blog;
     bookings: Booking;
+    features: Feature;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -85,6 +86,7 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
+    features: FeaturesSelect<false> | FeaturesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -199,6 +201,22 @@ export interface Page {
     };
     [k: string]: unknown;
   } | null;
+  sections?:
+    | {
+        title?: string | null;
+        features?:
+          | {
+              icon?: string | null;
+              title: string;
+              description: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'whyChooseUs';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -304,6 +322,37 @@ export interface Booking {
   createdAt: string;
 }
 /**
+ * Caractéristiques pour la section "Pourquoi nous choisir"
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "features".
+ */
+export interface Feature {
+  id: string;
+  /**
+   * Emoji ou caractère à afficher (ex: ✓, ⚡, 🌱, etc.)
+   */
+  icon: string;
+  /**
+   * Titre de la caractéristique
+   */
+  title: string;
+  /**
+   * Description de la caractéristique
+   */
+  description: string;
+  /**
+   * Ordre d'affichage (du plus petit au plus grand)
+   */
+  order?: number | null;
+  /**
+   * Afficher cette caractéristique
+   */
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -333,6 +382,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'bookings';
         value: string | Booking;
+      } | null)
+    | ({
+        relationTo: 'features';
+        value: string | Feature;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -427,6 +480,25 @@ export interface PagesSelect<T extends boolean = true> {
   metaDescription?: T;
   keywords?: T;
   content?: T;
+  sections?:
+    | T
+    | {
+        whyChooseUs?:
+          | T
+          | {
+              title?: T;
+              features?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -476,6 +548,19 @@ export interface BookingsSelect<T extends boolean = true> {
   date?: T;
   message?: T;
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "features_select".
+ */
+export interface FeaturesSelect<T extends boolean = true> {
+  icon?: T;
+  title?: T;
+  description?: T;
+  order?: T;
+  isActive?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -50,5 +50,10 @@
     "rights": "All rights reserved",
     "followUs": "Follow us",
     "contact": "Contact us"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "This page could not be found.",
+    "backHome": "Back to home"
   }
 }

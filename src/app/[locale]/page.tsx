@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import { BookingForm } from '@/app/(frontend)/components/forms/BookingForm'
+import { WhyChooseUs } from '@/app/(frontend)/components/common/WhyChooseUs'
 import '../(frontend)/styles.css'
 
 export default function HomePage() {
@@ -33,6 +34,8 @@ export default function HomePage() {
           />
         </div>
       </section>
+
+      <WhyChooseUs />
     </main>
   )
 }

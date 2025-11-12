@@ -43,7 +43,7 @@ export const BookingForm = ({
     setError('')
 
     try {
-      const response = await fetch('/api/bookings', {
+      const response = await fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

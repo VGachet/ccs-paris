@@ -65,3 +65,23 @@ export async function getServices() {
     return []
   }
 }
+
+export async function getFeatures() {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const features = await payload.find({
+      collection: 'features' as any,
+      where: {
+        isActive: {
+          equals: true,
+        },
+      },
+      sort: 'order',
+      limit: 50,
+    })
+    return features.docs || []
+  } catch (error) {
+    console.error('Error fetching features:', error)
+    return []
+  }
+}
