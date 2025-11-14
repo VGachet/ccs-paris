@@ -94,9 +94,13 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  globals: {};
-  globalsSelect: {};
-  locale: null;
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
+  locale: 'fr' | 'en';
   user: User & {
     collection: 'users';
   };
@@ -247,11 +251,30 @@ export interface Service {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Image principale du service
+   */
   image?: (string | null) | Media;
+  /**
+   * Vidéo du service (prioritaire sur les images si présente)
+   */
+  video?: (string | null) | Media;
+  /**
+   * Image "Avant" pour la comparaison
+   */
+  beforeImage?: (string | null) | Media;
+  /**
+   * Image "Après" pour la comparaison
+   */
+  afterImage?: (string | null) | Media;
   /**
    * Informations de tarification
    */
   pricing?: string | null;
+  /**
+   * Nombre de colonnes que prend ce service dans la grille
+   */
+  columnSpan?: ('1' | '2' | '3') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -512,7 +535,11 @@ export interface ServicesSelect<T extends boolean = true> {
   slug?: T;
   description?: T;
   image?: T;
+  video?: T;
+  beforeImage?: T;
+  afterImage?: T;
   pricing?: T;
+  columnSpan?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -595,6 +622,34 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: string;
+  /**
+   * Image affichée en arrière-plan de la section hero de la page d'accueil
+   */
+  heroBackgroundImage?: (string | null) | Media;
+  /**
+   * Opacité du calque sombre sur l'image (0 = transparent, 1 = opaque)
+   */
+  heroOverlayOpacity?: number | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  heroBackgroundImage?: T;
+  heroOverlayOpacity?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,7 +1,9 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-export async function getPageData(slug: string) {
+type Locale = 'fr' | 'en' | 'all'
+
+export async function getPageData(slug: string, locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })
     const pages = await payload.find({
@@ -11,6 +13,7 @@ export async function getPageData(slug: string) {
           equals: slug,
         },
       },
+      locale,
     })
     return pages.docs[0] || null
   } catch (error) {
@@ -19,13 +22,14 @@ export async function getPageData(slug: string) {
   }
 }
 
-export async function getBlogPosts() {
+export async function getBlogPosts(locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })
     const posts = await payload.find({
       collection: 'blog' as any,
       sort: '-publishedAt',
       limit: 10,
+      locale,
     })
     return posts.docs || []
   } catch (error) {
@@ -34,7 +38,7 @@ export async function getBlogPosts() {
   }
 }
 
-export async function getBlogPostBySlug(slug: string) {
+export async function getBlogPostBySlug(slug: string, locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })
     const posts = await payload.find({
@@ -44,6 +48,7 @@ export async function getBlogPostBySlug(slug: string) {
           equals: slug,
         },
       },
+      locale,
     })
     return posts.docs[0] || null
   } catch (error) {
@@ -52,12 +57,13 @@ export async function getBlogPostBySlug(slug: string) {
   }
 }
 
-export async function getServices() {
+export async function getServices(locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })
     const services = await payload.find({
       collection: 'services' as any,
       limit: 50,
+      locale,
     })
     return services.docs || []
   } catch (error) {
@@ -66,7 +72,7 @@ export async function getServices() {
   }
 }
 
-export async function getFeatures() {
+export async function getFeatures(locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })
     const features = await payload.find({
@@ -78,6 +84,7 @@ export async function getFeatures() {
       },
       sort: 'order',
       limit: 50,
+      locale,
     })
     return features.docs || []
   } catch (error) {

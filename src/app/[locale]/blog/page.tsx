@@ -25,7 +25,7 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/public/blog-posts')
+        const response = await fetch(`/api/public/blog-posts?locale=${locale}`)
         const data = await response.json()
         setPosts(data || [])
       } catch (error) {
@@ -36,7 +36,7 @@ export default function BlogPage() {
     }
 
     fetchPosts()
-  }, [])
+  }, [locale])
 
   if (loading) {
     return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>

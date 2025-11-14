@@ -75,23 +75,51 @@ button {
 .hero {
   background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
   color: white;
-  padding: 6rem 2rem;
+  padding: 4rem 2rem;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 40vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
 }
 
 .hero-content h1 {
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin: 0 0 1rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content p {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   margin: 0 0 2rem 0;
-  color: #ccc;
+  color: #f0f0f0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .cta-button {
@@ -112,7 +140,7 @@ button {
 }
 
 .services-intro {
-  padding: 4rem 2rem;
+  padding: 4rem 2rem 0rem 2rem;
   background: #fafafa;
   text-align: center;
 }
@@ -136,8 +164,13 @@ button {
 }
 
 @media (max-width: 768px) {
+  .hero {
+    min-height: 35vh;
+    padding: 3rem 1.5rem;
+  }
+
   .hero-content h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .hero-content p {

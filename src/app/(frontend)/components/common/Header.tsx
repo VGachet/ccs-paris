@@ -16,7 +16,6 @@ export const Header = () => {
           <nav className={styles.nav}>
             <Link href="/">{t('home')}</Link>
             <Link href="/blog">{t('blog')}</Link>
-            <Link href="/reservations">{t('reservations')}</Link>
           </nav>
           <LanguageSwitcher />
         </div>

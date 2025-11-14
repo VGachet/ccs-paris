@@ -11,32 +11,38 @@ export const Pages: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      localized: true,
     },
     {
       name: 'slug',
       type: 'text',
       unique: true,
       required: true,
+      localized: true,
     },
     {
       name: 'metaTitle',
       type: 'text',
+      localized: true,
       admin: { description: 'Titre SEO' },
     },
     {
       name: 'metaDescription',
       type: 'textarea',
+      localized: true,
       admin: { description: 'Description SEO' },
     },
     {
       name: 'keywords',
       type: 'text',
+      localized: true,
       admin: { description: 'Mots-clés séparés par virgule' },
     },
     {
       name: 'content',
       type: 'richText',
       editor: lexicalEditor(),
+      localized: true,
     },
     {
       name: 'sections',
@@ -53,12 +59,14 @@ export const Pages: CollectionConfig = {
               name: 'title',
               type: 'text',
               defaultValue: 'Pourquoi nous choisir ?',
+              localized: true,
             },
             {
               name: 'features',
               type: 'array',
               minRows: 1,
               maxRows: 6,
+              localized: true,
               fields: [
                 {
                   name: 'icon',
@@ -69,11 +77,13 @@ export const Pages: CollectionConfig = {
                   name: 'title',
                   type: 'text',
                   required: true,
+                  localized: true,
                 },
                 {
                   name: 'description',
                   type: 'textarea',
                   required: true,
+                  localized: true,
                 },
               ],
             },

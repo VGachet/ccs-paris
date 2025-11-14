@@ -20,6 +20,7 @@ export const Features: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      localized: true,
       admin: {
         description: 'Titre de la caractéristique',
       },
@@ -28,6 +29,7 @@ export const Features: CollectionConfig = {
       name: 'description',
       type: 'textarea',
       required: true,
+      localized: true,
       admin: {
         description: 'Description de la caractéristique',
       },

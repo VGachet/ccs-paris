@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 
 interface Feature {
   id: string
@@ -17,11 +18,13 @@ interface WhyChooseUsProps {
 export function WhyChooseUs({ title = 'Pourquoi nous choisir ?' }: WhyChooseUsProps) {
   const [features, setFeatures] = useState<Feature[]>([])
   const [loading, setLoading] = useState(true)
+  const params = useParams()
+  const locale = (params?.locale as string) || 'fr'
 
   useEffect(() => {
     const fetchFeatures = async () => {
       try {
-        const response = await fetch('/api/public/features')
+        const response = await fetch(`/api/public/features?locale=${locale}`)
         const data = await response.json()
         setFeatures(data || [])
       } catch (error) {
@@ -32,7 +35,7 @@ export function WhyChooseUs({ title = 'Pourquoi nous choisir ?' }: WhyChooseUsPr
     }
 
     fetchFeatures()
-  }, [])
+  }, [locale])
 
   if (loading) {
     return (

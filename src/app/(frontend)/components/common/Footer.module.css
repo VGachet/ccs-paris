@@ -12,21 +12,29 @@
 }
 
 .content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 2rem;
+  text-align: center;
 }
 
 .content p {
   margin: 0;
   font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.content a {
+  color: var(--color-accent, #d4af37);
+  text-decoration: none;
+  transition: color 0.3s ease;
+  padding: 0;
+}
+
+.content a:hover {
+  color: #e8c547;
+  text-decoration: underline;
 }
 
 @media (max-width: 768px) {
-  .content {
-    flex-direction: column;
-    text-align: center;
+  .content p {
+    font-size: 0.9rem;
   }
 }

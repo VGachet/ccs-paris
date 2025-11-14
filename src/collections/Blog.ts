@@ -11,12 +11,14 @@ export const Blog: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      localized: true,
     },
     {
       name: 'slug',
       type: 'text',
       unique: true,
       required: true,
+      localized: true,
       admin: {
         description: 'URL slug généré automatiquement',
       },
@@ -25,6 +27,7 @@ export const Blog: CollectionConfig = {
       name: 'excerpt',
       type: 'textarea',
       required: true,
+      localized: true,
       admin: {
         description: 'Résumé court de l\'article',
       },
@@ -34,6 +37,7 @@ export const Blog: CollectionConfig = {
       type: 'richText',
       editor: lexicalEditor(),
       required: true,
+      localized: true,
     },
     {
       name: 'featuredImage',
@@ -54,16 +58,19 @@ export const Blog: CollectionConfig = {
     {
       name: 'metaTitle',
       type: 'text',
+      localized: true,
       admin: { description: 'Titre SEO' },
     },
     {
       name: 'metaDescription',
       type: 'textarea',
+      localized: true,
       admin: { description: 'Description SEO' },
     },
     {
       name: 'metaKeywords',
       type: 'text',
+      localized: true,
       admin: { description: 'Mots-clés séparés par virgule' },
     },
   ],
