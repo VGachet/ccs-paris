@@ -35,12 +35,12 @@ export async function generateStaticParams() {
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params
 
-  if (!routing.locales.includes(locale as any)) {
+  if (!routing.locales.includes(locale as 'fr' | 'en')) {
     notFound()
   }
 
   const messages = await getMessages()
-  const siteSettings = await getSiteSettings(locale as any)
+  const siteSettings = await getSiteSettings(locale as 'fr' | 'en')
 
   return (
     <html lang={locale} className={`${lato.variable} ${playfairDisplay.variable}`}>

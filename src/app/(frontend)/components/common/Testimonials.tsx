@@ -64,8 +64,6 @@ export function Testimonials({ maxDisplay, onCountChange }: TestimonialsProps) {
   }, [testimonials.length, itemsPerPage])
 
   const totalPages = Math.ceil(testimonials.length / itemsPerPage)
-  const startIndex = currentPage * itemsPerPage
-  const currentTestimonials = testimonials.slice(startIndex, startIndex + itemsPerPage)
 
   const goToPage = (page: number) => {
     setCurrentPage(page)
@@ -117,7 +115,7 @@ export function Testimonials({ maxDisplay, onCountChange }: TestimonialsProps) {
                 
                 {renderStars(testimonial.rating)}
                 
-                <p className={styles.content}>"{testimonial.content}"</p>
+                <p className={styles.content}>&ldquo;{testimonial.content}&rdquo;</p>
                 
                 {testimonial.date && (
                   <div className={styles.date}>{formatDate(testimonial.date)}</div>

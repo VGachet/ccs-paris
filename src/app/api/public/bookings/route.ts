@@ -1,16 +1,36 @@
+import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
-export const POST = async (request: Request) => {
+interface BookingData {
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  service: string
+  date: string
+  message: string
+  locale: string
+}
+
+export async function POST(request: NextRequest) {
   try {
-    const data = await request.json()
+    const body = await request.json()
+    const { firstName, lastName, email, phone, service, date, message, locale } = body as BookingData
+
     const payload = await getPayload({ config: configPromise })
 
     // Créer la réservation en base
     const booking = await payload.create({
-      collection: 'bookings' as any,
+      collection: 'bookings',
       data: {
-        ...data,
+        firstName,
+        lastName,
+        email,
+        phone,
+        service,
+        date,
+        message,
         status: 'pending',
       },
     })

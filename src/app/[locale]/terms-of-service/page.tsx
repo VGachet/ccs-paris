@@ -5,11 +5,11 @@ import configPromise from '@payload-config'
 import styles from './legal.module.css'
 
 interface Props {
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = (await params)
+  const { locale } = await params
   const payload = await getPayload({ config: configPromise })
 
   try {
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function TermsOfServicePage({ params }: Props) {
-  const { locale } = (await params)
+  const { locale } = await params
   const t = await getTranslations('legal')
   const payload = await getPayload({ config: configPromise })
 
@@ -95,12 +95,29 @@ export default async function TermsOfServicePage({ params }: Props) {
 }
 
 // Fonction pour convertir le contenu Lexical en HTML
-function renderLexicalContent(content: any): string {
+interface LexicalNode {
+  type: string
+  children?: LexicalNode[]
+  tag?: string
+  listType?: string
+  text?: string
+  format?: number
+  url?: string
+  newTab?: boolean
+}
+
+interface LexicalContent {
+  root?: {
+    children?: LexicalNode[]
+  }
+}
+
+function renderLexicalContent(content: LexicalContent): string {
   if (!content || !content.root || !content.root.children) {
-    return '<p>Contenu à ajouter via le panel d\'administration Payload CMS</p>'
+    return '<p>Contenu \u00e0 ajouter via le panel d\'administration Payload CMS</p>'
   }
 
-  const renderNode = (node: any): string => {
+  const renderNode = (node: LexicalNode): string => {
     if (node.type === 'paragraph') {
       const children = node.children?.map(renderNode).join('') || ''
       return `<p>${children}</p>`
@@ -121,9 +138,9 @@ function renderLexicalContent(content: any): string {
     }
     if (node.type === 'text') {
       let text = node.text || ''
-      if (node.format & 1) text = `<strong>${text}</strong>` // bold
-      if (node.format & 2) text = `<em>${text}</em>` // italic
-      if (node.format & 8) text = `<u>${text}</u>` // underline
+      if (node.format && node.format & 1) text = `<strong>${text}</strong>` // bold
+      if (node.format && node.format & 2) text = `<em>${text}</em>` // italic
+      if (node.format && node.format & 8) text = `<u>${text}</u>` // underline
       return text
     }
     if (node.type === 'link') {

@@ -1,10 +1,6 @@
 'use client'
 
-import { useTranslations } from 'next-intl'
-
 export default function BlogPostPage() {
-  const t = useTranslations('blog')
-
   return (
     <main>
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto', minHeight: '60vh' }}>

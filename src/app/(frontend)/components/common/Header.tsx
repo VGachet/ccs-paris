@@ -7,8 +7,17 @@ import { LanguageSwitcher } from './LanguageSwitcher'
 import styles from './Header.module.css'
 import Image from 'next/image'
 
+interface LogoImage {
+  url: string
+  alt?: string
+}
+
+interface SiteSettings {
+  logo?: string | LogoImage
+}
+
 interface HeaderProps {
-  siteSettings?: any
+  siteSettings?: SiteSettings
 }
 
 export const Header = ({ siteSettings }: HeaderProps) => {

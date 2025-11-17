@@ -16,11 +16,11 @@ interface BlogPost {
 }
 
 interface Props {
-  params: { locale: string }
+  params: Promise<{ locale: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = (await params)
+  const { locale } = await params
   const payload = await getPayload({ config: configPromise })
 
   try {
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogPage({ params }: Props) {
-  const { locale } = (await params)
+  const { locale } = await params
   const t = await getTranslations('blog')
   const payload = await getPayload({ config: configPromise })
 

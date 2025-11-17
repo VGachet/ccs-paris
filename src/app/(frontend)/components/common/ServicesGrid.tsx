@@ -5,27 +5,20 @@ import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import styles from './ServicesGrid.module.css'
 
+interface MediaItem {
+  url: string
+  alt?: string
+}
+
 interface Service {
   id: string
   name: string
   slug: string
-  description: any
-  image?: {
-    url: string
-    alt?: string
-  }
-  video?: {
-    url: string
-    alt?: string
-  }
-  beforeImage?: {
-    url: string
-    alt?: string
-  }
-  afterImage?: {
-    url: string
-    alt?: string
-  }
+  description: string
+  image?: MediaItem
+  video?: MediaItem
+  beforeImage?: MediaItem
+  afterImage?: MediaItem
   pricing?: string
   columnSpan?: '1' | '2' | '3'
 }
@@ -245,9 +238,7 @@ export function ServicesGrid() {
                 <h3 className={styles.serviceName}>{service.name}</h3>
                 {service.description && (
                   <div className={styles.serviceDescription}>
-                    {typeof service.description === 'string' 
-                      ? service.description 
-                      : 'Description disponible'}
+                    {service.description}
                   </div>
                 )}
                 {service.pricing && (
