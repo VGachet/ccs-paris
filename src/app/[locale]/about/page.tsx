@@ -4,10 +4,8 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Image from 'next/image'
 import { BookingForm } from '@/app/(frontend)/components/forms/BookingForm'
-import { WhyChooseUs } from '@/app/(frontend)/components/common/WhyChooseUs'
-import { ServicesGrid } from '@/app/(frontend)/components/common/ServicesGrid'
 import type { Media } from '@/payload-types'
-import '../(frontend)/styles.css'
+import styles from './about.module.css'
 
 interface Props {
   params: { locale: string }
@@ -23,24 +21,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale: locale as 'fr' | 'en',
     })
 
-    if (settings.homeMetaTitle || settings.homeMetaDescription) {
+    if (settings.aboutMetaTitle || settings.aboutMetaDescription) {
       return {
-        title: settings.homeMetaTitle || 'CCS Paris',
-        description: settings.homeMetaDescription || 'Nettoyage Textile Professionnel à Paris',
+        title: settings.aboutMetaTitle || 'À Propos',
+        description: settings.aboutMetaDescription || 'À propos de nous',
       }
     }
   } catch (error) {
     console.error('Error generating metadata:', error)
   }
 
-  const t = await getTranslations({ locale, namespace: 'hero' })
+  const t = await getTranslations({ locale, namespace: 'common' })
   return {
-    title: t('title'),
-    description: t('subtitle'),
+    title: t('about'),
+    description: t('about'),
   }
 }
 
-export default async function HomePage({ params }: Props) {
+export default async function AboutPage({ params }: Props) {
   const { locale } = (await params)
   const t = await getTranslations()
   const payload = await getPayload({ config: configPromise })
@@ -55,60 +53,36 @@ export default async function HomePage({ params }: Props) {
     console.error('Error fetching site settings:', error)
   }
 
-  const heroImage = settings?.heroBackgroundImage && typeof settings.heroBackgroundImage !== 'string' 
-    ? settings.heroBackgroundImage as Media 
+  const aboutImage = settings?.aboutImage && typeof settings.aboutImage !== 'string' 
+    ? settings.aboutImage as Media 
     : null
 
   return (
-    <main>
-      <section className="hero" style={{ position: 'relative' }}>
-        {heroImage?.url && (
-          <>
-            <div className="hero-background">
+    <main className={styles.container}>
+      <section className={styles.header}>
+        <div className={styles.contentGrid}>
+          {aboutImage?.url && (
+            <div className={styles.imageWrapper}>
               <Image
-                src={heroImage.url}
-                alt={heroImage.alt || 'Hero background'}
-                fill
-                style={{ objectFit: 'cover' }}
+                src={aboutImage.url}
+                alt={aboutImage.alt || 'À Propos'}
+                width={400}
+                height={400}
+                style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                 priority
               />
             </div>
-            <div 
-              className="hero-overlay"
-              style={{ opacity: settings?.heroOverlayOpacity || 0.5 }}
-            />
-          </>
-        )}
-        <div className="hero-content">
-          <h1>{t('hero.title')}</h1>
-          <p>{t('hero.subtitle')}</p>
-          <a href="#booking-form" className="cta-button">{t('hero.cta')}</a>
-        </div>
-      </section>
-
-      {settings?.servicesIntroText && (
-        <section className="services-intro-content">
-          <div className="container">
-            <div 
-              className="wysiwyg-content"
-              dangerouslySetInnerHTML={{ 
-                __html: renderLexicalContent(settings.servicesIntroText) 
-              }} 
-            />
+          )}
+          <div className={styles.textContent}>
+            <h1>{settings?.aboutTitle || t('common.about')}</h1>
+            {settings?.aboutText && (
+              <div className={styles.description} dangerouslySetInnerHTML={{ __html: renderLexicalContent(settings.aboutText) }} />
+            )}
           </div>
-        </section>
-      )}
-
-      <section className="services-intro">
-        <div className="container">
-          <h2>{t('services.title')}</h2>
-          <p>{t('services.description')}</p>
         </div>
       </section>
 
-      <ServicesGrid />
-
-      <section id="booking-form" className="booking-section">
+      <section className="booking-section">
         <div className="container">
           <BookingForm
             title={t('booking.title')}
@@ -117,8 +91,6 @@ export default async function HomePage({ params }: Props) {
           />
         </div>
       </section>
-
-      <WhyChooseUs />
     </main>
   )
 }

@@ -5,6 +5,7 @@
     "blog": "Blog",
     "reservations": "Réservations",
     "contact": "Contact",
+    "about": "À Propos",
     "language": "Langue",
     "french": "Français",
     "english": "English"
@@ -25,18 +26,24 @@
   "booking": {
     "title": "Demander une réservation",
     "description": "Remplissez le formulaire pour obtenir un devis gratuit",
+    "contactByMessage": "Nous contacter par message",
     "firstName": "Prénom",
     "lastName": "Nom",
     "email": "Email",
     "phone": "Téléphone",
+    "address": "Adresse complète",
     "service": "Service",
     "date": "Date souhaitée",
     "message": "Message (optionnel)",
     "selectService": "Sélectionner un service",
+    "selectServices": "Sélectionnez vos services",
     "submit": "Envoyer ma demande",
     "sending": "Envoi en cours...",
     "success": "✓ Votre demande a été envoyée avec succès ! Nous vous contacterons sous 24h.",
-    "error": "✗ Une erreur est survenue"
+    "error": "✗ Une erreur est survenue",
+    "callNow": "Appeler maintenant",
+    "whatsapp": "WhatsApp",
+    "or": "Ou"
   },
   "blog": {
     "title": "Blog",
@@ -49,7 +56,17 @@
   "footer": {
     "rights": "Tous droits réservés",
     "followUs": "Nous suivre",
-    "contact": "Nous contacter"
+    "contact": "Nous contacter",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions générales d'utilisation"
+  },
+  "legal": {
+    "loading": "Chargement...",
+    "noContentYet": "Aucun contenu disponible pour le moment.",
+    "addContentInCMS": "Vous pouvez ajouter le contenu via le panel d'administration Payload CMS.",
+    "lastUpdated": "Dernière mise à jour",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions générales d'utilisation"
   },
   "notFound": {
     "title": "Page introuvable",

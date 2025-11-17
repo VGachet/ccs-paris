@@ -5,6 +5,7 @@
     "blog": "Blog",
     "reservations": "Reservations",
     "contact": "Contact",
+    "about": "About",
     "language": "Language",
     "french": "Français",
     "english": "English"
@@ -25,18 +26,24 @@
   "booking": {
     "title": "Request a Reservation",
     "description": "Fill in the form to get a free quote",
+    "contactByMessage": "Contact us by message",
     "firstName": "First name",
     "lastName": "Last name",
     "email": "Email",
     "phone": "Phone",
+    "address": "Full address",
     "service": "Service",
     "date": "Preferred date",
     "message": "Message (optional)",
     "selectService": "Select a service",
+    "selectServices": "Select your services",
     "submit": "Send my request",
     "sending": "Sending...",
     "success": "✓ Your request has been sent successfully! We will contact you within 24 hours.",
-    "error": "✗ An error occurred"
+    "error": "✗ An error occurred",
+    "callNow": "Call now",
+    "whatsapp": "WhatsApp",
+    "or": "Or"
   },
   "blog": {
     "title": "Blog",
@@ -49,7 +56,17 @@
   "footer": {
     "rights": "All rights reserved",
     "followUs": "Follow us",
-    "contact": "Contact us"
+    "contact": "Contact us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  },
+  "legal": {
+    "loading": "Loading...",
+    "noContentYet": "No content available yet.",
+    "addContentInCMS": "You can add content via the Payload CMS admin panel.",
+    "lastUpdated": "Last updated",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
   },
   "notFound": {
     "title": "Page not found",

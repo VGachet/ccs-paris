@@ -1,0 +1,115 @@
+.container {
+  min-height: 60vh;
+}
+
+.header {
+  margin-bottom: 3rem;
+  padding: 2rem;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.imageWrapper {
+  width: 100%;
+  max-width: 350px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.imageWrapper img {
+  display: block;
+  border-radius: 12px;
+}
+
+.textContent {
+  padding: 1rem 0;
+}
+
+.textContent h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  margin: 0 auto;
+  max-width: 700px;
+  text-align: left;
+}
+
+.description p {
+  margin-bottom: 1rem;
+}
+
+.description h2 {
+  font-size: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.description h3 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+  color: #444;
+}
+
+.description ul,
+.description ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.description li {
+  margin-bottom: 0.5rem;
+}
+
+.description a {
+  color: #d4af37;
+  text-decoration: underline;
+}
+
+.description a:hover {
+  color: #b8941f;
+}
+
+.description strong {
+  font-weight: 600;
+}
+
+.formSection {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .textContent h1 {
+    font-size: 2rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .formSection {
+    padding: 1rem;
+  }
+}

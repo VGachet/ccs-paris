@@ -74,6 +74,8 @@ export interface Config {
     blog: Blog;
     bookings: Booking;
     features: Feature;
+    testimonials: Testimonial;
+    'legal-pages': LegalPage;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -87,6 +89,8 @@ export interface Config {
     blog: BlogSelect<false> | BlogSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
     features: FeaturesSelect<false> | FeaturesSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
+    'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -376,6 +380,101 @@ export interface Feature {
   createdAt: string;
 }
 /**
+ * Avis clients pour la section "Pourquoi nous choisir"
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: string;
+  /**
+   * Nom du client
+   */
+  customerName: string;
+  /**
+   * Titre/profession du client (optionnel)
+   */
+  customerTitle?: string | null;
+  /**
+   * URL de l'avatar ou emoji (ex: 👤, 🙍, etc.)
+   */
+  customerAvatar?: string | null;
+  /**
+   * Contenu de l'avis
+   */
+  content: string;
+  /**
+   * Note sur 5 étoiles
+   */
+  rating: number;
+  /**
+   * Date de l'avis (optionnel)
+   */
+  date?: string | null;
+  /**
+   * ✅ Avis modéré et validé
+   */
+  isApproved: boolean;
+  /**
+   * Afficher cet avis
+   */
+  isActive?: boolean | null;
+  /**
+   * Ordre d'affichage (du plus petit au plus grand)
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages".
+ */
+export interface LegalPage {
+  id: string;
+  /**
+   * Titre de la page légale
+   */
+  title: string;
+  /**
+   * Sélectionner le type de page légale
+   */
+  slug: 'privacy-policy' | 'terms-of-service';
+  /**
+   * Contenu de la page légale
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Titre SEO
+   */
+  metaTitle?: string | null;
+  /**
+   * Description SEO
+   */
+  metaDescription?: string | null;
+  /**
+   * Date de dernière mise à jour
+   */
+  lastUpdated?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -409,6 +508,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'features';
         value: string | Feature;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: string | Testimonial;
+      } | null)
+    | ({
+        relationTo: 'legal-pages';
+        value: string | LegalPage;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -593,6 +700,38 @@ export interface FeaturesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  customerName?: T;
+  customerTitle?: T;
+  customerAvatar?: T;
+  content?: T;
+  rating?: T;
+  date?: T;
+  isApproved?: T;
+  isActive?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "legal-pages_select".
+ */
+export interface LegalPagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  metaTitle?: T;
+  metaDescription?: T;
+  lastUpdated?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -630,6 +769,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: string;
   /**
+   * Logo affiché dans le header de toutes les pages
+   */
+  logo?: (string | null) | Media;
+  /**
    * Image affichée en arrière-plan de la section hero de la page d'accueil
    */
   heroBackgroundImage?: (string | null) | Media;
@@ -637,6 +780,74 @@ export interface SiteSetting {
    * Opacité du calque sombre sur l'image (0 = transparent, 1 = opaque)
    */
   heroOverlayOpacity?: number | null;
+  /**
+   * Titre qui apparaît dans les résultats de recherche
+   */
+  homeMetaTitle?: string | null;
+  /**
+   * Description qui apparaît dans les résultats de recherche
+   */
+  homeMetaDescription?: string | null;
+  /**
+   * Contenu affiché au-dessus de la section "Nos Services" sur la page d'accueil
+   */
+  servicesIntroText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Titre qui apparaît dans les résultats de recherche
+   */
+  blogMetaTitle?: string | null;
+  /**
+   * Description qui apparaît dans les résultats de recherche
+   */
+  blogMetaDescription?: string | null;
+  /**
+   * Image affichée en haut de la page à propos
+   */
+  aboutImage?: (string | null) | Media;
+  /**
+   * Titre principal de la page à propos
+   */
+  aboutTitle?: string | null;
+  /**
+   * Contenu descriptif affiché sur la page à propos
+   */
+  aboutText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Titre qui apparaît dans les résultats de recherche
+   */
+  aboutMetaTitle?: string | null;
+  /**
+   * Description qui apparaît dans les résultats de recherche
+   */
+  aboutMetaDescription?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -645,8 +856,19 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
+  logo?: T;
   heroBackgroundImage?: T;
   heroOverlayOpacity?: T;
+  homeMetaTitle?: T;
+  homeMetaDescription?: T;
+  servicesIntroText?: T;
+  blogMetaTitle?: T;
+  blogMetaDescription?: T;
+  aboutImage?: T;
+  aboutTitle?: T;
+  aboutText?: T;
+  aboutMetaTitle?: T;
+  aboutMetaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

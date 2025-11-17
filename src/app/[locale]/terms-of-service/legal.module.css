@@ -1,0 +1,100 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  min-height: 60vh;
+}
+
+.container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.lastUpdated {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.content {
+  line-height: 1.8;
+  color: #333;
+}
+
+.content h2 {
+  font-size: 1.8rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+.content h3 {
+  font-size: 1.4rem;
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+  color: #333;
+}
+
+.content h4 {
+  font-size: 1.2rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.6rem;
+  color: #444;
+}
+
+.content p {
+  margin-bottom: 1.2rem;
+}
+
+.content ul,
+.content ol {
+  margin-bottom: 1.2rem;
+  padding-left: 2rem;
+}
+
+.content li {
+  margin-bottom: 0.5rem;
+}
+
+.content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.content a:hover {
+  color: #004499;
+}
+
+.content strong {
+  font-weight: 600;
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.placeholder {
+  background-color: #f5f5f5;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.placeholder p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.placeholder p:first-child {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+}

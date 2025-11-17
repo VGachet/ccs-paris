@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { Testimonials } from './Testimonials'
 
 interface Feature {
   id: string
@@ -18,6 +19,7 @@ interface WhyChooseUsProps {
 export function WhyChooseUs({ title = 'Pourquoi nous choisir ?' }: WhyChooseUsProps) {
   const [features, setFeatures] = useState<Feature[]>([])
   const [loading, setLoading] = useState(true)
+  const [testimonialsCount, setTestimonialsCount] = useState(0)
   const params = useParams()
   const locale = (params?.locale as string) || 'fr'
 
@@ -78,6 +80,19 @@ export function WhyChooseUs({ title = 'Pourquoi nous choisir ?' }: WhyChooseUsPr
             </div>
           ))}
         </div>
+
+        {/* Section des avis clients */}
+        {testimonialsCount > 0 && (
+          <div style={{ marginTop: '4rem' }}>
+            <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem' }}>
+              {locale === 'fr' ? 'Ce que nos clients disent' : 'What our clients say'}
+            </h3>
+            <Testimonials maxDisplay={6} onCountChange={setTestimonialsCount} />
+          </div>
+        )}
+        {testimonialsCount === 0 && (
+          <Testimonials maxDisplay={6} onCountChange={setTestimonialsCount} />
+        )}
       </div>
     </section>
   )

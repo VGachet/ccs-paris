@@ -1,9 +1,8 @@
-'use client'
-
-import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
 import Link from 'next/link'
-import { useLocale } from 'next-intl'
 
 interface BlogPost {
   id: string
@@ -16,30 +15,52 @@ interface BlogPost {
   }
 }
 
-export default function BlogPage() {
-  const t = useTranslations('blog')
-  const locale = useLocale()
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [loading, setLoading] = useState(true)
+interface Props {
+  params: { locale: string }
+}
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(`/api/public/blog-posts?locale=${locale}`)
-        const data = await response.json()
-        setPosts(data || [])
-      } catch (error) {
-        console.error('Error fetching blog posts:', error)
-      } finally {
-        setLoading(false)
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = (await params)
+  const payload = await getPayload({ config: configPromise })
+
+  try {
+    const settings = await payload.findGlobal({
+      slug: 'site-settings',
+      locale: locale as 'fr' | 'en',
+    })
+
+    if (settings.blogMetaTitle || settings.blogMetaDescription) {
+      return {
+        title: settings.blogMetaTitle || 'Blog',
+        description: settings.blogMetaDescription || 'Blog CCS Paris',
       }
     }
+  } catch (error) {
+    console.error('Error generating metadata:', error)
+  }
 
-    fetchPosts()
-  }, [locale])
+  const t = await getTranslations({ locale, namespace: 'blog' })
+  return {
+    title: t('title'),
+    description: t('latestArticles'),
+  }
+}
 
-  if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>
+export default async function BlogPage({ params }: Props) {
+  const { locale } = (await params)
+  const t = await getTranslations('blog')
+  const payload = await getPayload({ config: configPromise })
+
+  let posts: BlogPost[] = []
+  try {
+    const result = await payload.find({
+      collection: 'blog',
+      locale: locale as 'fr' | 'en',
+      sort: '-publishedAt',
+    })
+    posts = result.docs as BlogPost[]
+  } catch (error) {
+    console.error('Error fetching blog posts:', error)
   }
 
   return (

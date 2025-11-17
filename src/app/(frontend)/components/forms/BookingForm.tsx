@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import styles from './BookingForm.module.css'
 
 interface BookingFormProps {
@@ -10,31 +10,67 @@ interface BookingFormProps {
   variant?: 'default' | 'compact' | 'modal'
 }
 
+interface Service {
+  id: string
+  name?: string
+  title?: string
+  slug: string
+  pricing?: string
+}
+
 export const BookingForm = ({
   title,
   description,
   variant = 'default',
 }: BookingFormProps) => {
   const t = useTranslations('booking')
-  const tServices = useTranslations('services')
+  const locale = useLocale()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [services, setServices] = useState<Service[]>([])
+  const [selectedServices, setSelectedServices] = useState<{ [key: string]: number }>({})
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-    service: '',
-    date: '',
+    address: '',
     message: '',
   })
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch(`/api/public/services?locale=${locale}`)
+        const data = await response.json()
+        console.log('Services fetched:', data)
+        console.log('First service:', data[0])
+        setServices(data || [])
+      } catch (error) {
+        console.error('Error fetching services:', error)
+      }
+    }
+    fetchServices()
+  }, [locale])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleServiceQuantity = (serviceId: string, change: number) => {
+    setSelectedServices((prev) => {
+      const current = prev[serviceId] || 0
+      const newValue = Math.max(0, current + change)
+      if (newValue === 0) {
+        const { [serviceId]: _, ...rest } = prev
+        return rest
+      }
+      return { ...prev, [serviceId]: newValue }
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,7 +82,10 @@ export const BookingForm = ({
       const response = await fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          services: selectedServices,
+        }),
       })
 
       if (!response.ok) throw new Error('Erreur lors de l\'envoi')
@@ -57,10 +96,10 @@ export const BookingForm = ({
         lastName: '',
         email: '',
         phone: '',
-        service: '',
-        date: '',
+        address: '',
         message: '',
       })
+      setSelectedServices({})
 
       setTimeout(() => setSuccess(false), 5000)
     } catch (_err) {
@@ -70,11 +109,31 @@ export const BookingForm = ({
     }
   }
 
+  const phoneNumber = '+33651135174'
+  const whatsappMessage = encodeURIComponent('Bonjour, je souhaite obtenir un devis pour vos services de nettoyage.')
+
   return (
     <div className={`${styles.bookingForm} ${styles[variant]}`}>
       <div className={styles.header}>
-        <h3>{title || t('title')}</h3>
-        {description && <p>{description || t('description')}</p>}
+        <h3>{title || t('contactByMessage')}</h3>
+      </div>
+
+      <div className={styles.contactButtons}>
+        <a href={`tel:${phoneNumber}`} className={styles.callButton}>
+          📞 {t('callNow')}
+        </a>
+        <a 
+          href={`https://wa.me/${phoneNumber.replace(/\+/g, '')}?text=${whatsappMessage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.whatsappButton}
+        >
+          💬 {t('whatsapp')}
+        </a>
+      </div>
+
+      <div className={styles.divider}>
+        <span>{t('or')}</span>
       </div>
 
       {success && <div className={styles.successMessage}>{t('success')}</div>}
@@ -82,6 +141,54 @@ export const BookingForm = ({
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <form onSubmit={handleSubmit} className={styles.form}>
+        {description && <p className={styles.formDescription}>{description || t('description')}</p>}
+
+        <div className={styles.servicesSection}>
+          <h4>{t('selectServices')}</h4>
+          {services.length === 0 ? (
+            <p style={{ color: '#999', textAlign: 'center', padding: '1rem' }}>
+              Chargement des services...
+            </p>
+          ) : (
+            <div className={styles.servicesList}>
+              {services.map((service) => {
+                const serviceName = service.name || service.title || 'Service sans nom'
+                console.log('Rendering service:', service.id, serviceName)
+                return (
+                  <div key={service.id} className={styles.serviceItem}>
+                    <div className={styles.serviceInfo}>
+                      <span className={styles.serviceName}>{serviceName}</span>
+                      {service.pricing && (
+                        <span className={styles.servicePrice}>{service.pricing}</span>
+                      )}
+                    </div>
+                    <div className={styles.quantityControls}>
+                      <button
+                        type="button"
+                        onClick={() => handleServiceQuantity(service.id, -1)}
+                        className={styles.quantityButton}
+                        disabled={!selectedServices[service.id]}
+                      >
+                        −
+                      </button>
+                      <span className={styles.quantity}>
+                        {selectedServices[service.id] || 0}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleServiceQuantity(service.id, 1)}
+                        className={styles.quantityButton}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
         <div className={styles.row}>
           <input
             type="text"
@@ -122,27 +229,15 @@ export const BookingForm = ({
           />
         </div>
 
-        <div className={styles.row}>
-          <select
-            name="service"
-            value={formData.service}
-            onChange={handleChange}
-            required
-          >
-            <option value="">{t('selectService')}</option>
-            <option value="carpet-cleaning">{tServices('carpetCleaning')}</option>
-            <option value="sofa-cleaning">{tServices('sofaCleaning')}</option>
-            <option value="auto-seats">{tServices('autoSeats')}</option>
-            <option value="other">{tServices('other')}</option>
-          </select>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <input
+          type="text"
+          name="address"
+          placeholder={t('address')}
+          value={formData.address}
+          onChange={handleChange}
+          required
+          className={styles.fullWidth}
+        />
 
         <textarea
           name="message"

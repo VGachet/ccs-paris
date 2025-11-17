@@ -14,6 +14,8 @@ import { Services } from './collections/Services'
 import { Blog } from './collections/Blog'
 import { Bookings } from './collections/Bookings'
 import { Features } from './collections/Features'
+import { LegalPages } from './collections/LegalPages'
+import { Testimonials } from './collections/Testimonials'
 import { SiteSettings } from './collections/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -26,7 +28,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages, Services, Blog, Bookings, Features],
+  collections: [Users, Media, Pages, Services, Blog, Bookings, Features, Testimonials, LegalPages],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

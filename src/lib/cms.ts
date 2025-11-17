@@ -92,3 +92,17 @@ export async function getFeatures(locale: Locale = 'fr') {
     return []
   }
 }
+
+export async function getSiteSettings(locale: Locale = 'fr') {
+  try {
+    const payload = await getPayload({ config: configPromise })
+    const settings = await payload.findGlobal({
+      slug: 'site-settings' as any,
+      locale,
+    })
+    return settings || null
+  } catch (error) {
+    console.error('Error fetching site settings:', error)
+    return null
+  }
+}

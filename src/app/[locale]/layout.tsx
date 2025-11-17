@@ -5,7 +5,23 @@ import { getMessages } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { Header } from '@/app/(frontend)/components/common/Header'
 import { Footer } from '@/app/(frontend)/components/common/Footer'
+import { getSiteSettings } from '@/lib/cms'
+import { Lato, Playfair_Display } from 'next/font/google'
 import '../(frontend)/styles.css'
+
+const lato = Lato({
+  weight: ['300', '400', '700', '900'],
+  subsets: ['latin'],
+  variable: '--font-lato',
+  display: 'swap',
+})
+
+const playfairDisplay = Playfair_Display({
+  weight: ['400', '600', '700', '900'],
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+})
 
 interface Props {
   children: ReactNode
@@ -24,12 +40,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   }
 
   const messages = await getMessages()
+  const siteSettings = await getSiteSettings(locale as any)
 
   return (
-    <html lang={locale}>
+    <html lang={locale} className={`${lato.variable} ${playfairDisplay.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <Header />
+          <Header siteSettings={siteSettings} />
           {children}
           <Footer />
         </NextIntlClientProvider>
