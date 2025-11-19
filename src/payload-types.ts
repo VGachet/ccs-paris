@@ -358,6 +358,10 @@ export interface Booking {
   service: string;
   date: string;
   message?: string | null;
+  /**
+   * Photos du mobilier ou sol à nettoyer
+   */
+  photos?: (string | Media)[] | null;
   status?: ('pending' | 'contacted' | 'completed') | null;
   updatedAt: string;
   createdAt: string;
@@ -739,6 +743,7 @@ export interface BookingsSelect<T extends boolean = true> {
   service?: T;
   date?: T;
   message?: T;
+  photos?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

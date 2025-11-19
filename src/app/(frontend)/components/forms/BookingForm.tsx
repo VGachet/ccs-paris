@@ -30,6 +30,7 @@ export const BookingForm = ({
   const [error, setError] = useState('')
   const [services, setServices] = useState<Service[]>([])
   const [selectedServices, setSelectedServices] = useState<{ [key: string]: number }>({})
+  const [photos, setPhotos] = useState<File[]>([])
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -73,18 +74,55 @@ export const BookingForm = ({
     })
   }
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    const totalPhotos = photos.length + files.length
+    
+    if (totalPhotos > 5) {
+      setError(t('maxPhotos'))
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+    
+    setPhotos((prev) => [...prev, ...files])
+  }
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
     try {
+      // Upload photos first if any
+      const photoIds: string[] = []
+      if (photos.length > 0) {
+        for (const photo of photos) {
+          const photoFormData = new FormData()
+          photoFormData.append('file', photo)
+
+          const uploadResponse = await fetch('/api/media', {
+            method: 'POST',
+            body: photoFormData,
+          })
+
+          if (uploadResponse.ok) {
+            const uploadData = await uploadResponse.json()
+            photoIds.push(uploadData.doc.id)
+          }
+        }
+      }
+
       const response = await fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
           services: selectedServices,
+          photos: photoIds,
         }),
       })
 
@@ -100,6 +138,7 @@ export const BookingForm = ({
         message: '',
       })
       setSelectedServices({})
+      setPhotos([])
 
       setTimeout(() => setSuccess(false), 5000)
     } catch (_err) {
@@ -247,6 +286,48 @@ export const BookingForm = ({
           rows={4}
           className={styles.formTextarea}
         />
+
+        <div className={styles.photosSection}>
+          <label className={styles.photosLabel}>
+            {t('photos')}
+            <span className={styles.photoDescription}>{t('photosDescription')}</span>
+          </label>
+          
+          {photos.length > 0 && (
+            <div className={styles.photosPreviews}>
+              {photos.map((photo, index) => (
+                <div key={index} className={styles.photoPreview}>
+                  <img 
+                    src={URL.createObjectURL(photo)} 
+                    alt={`Preview ${index + 1}`}
+                    className={styles.previewImage}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(index)}
+                    className={styles.removePhotoButton}
+                    aria-label="Supprimer la photo"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {photos.length < 5 && (
+            <label className={styles.photoUploadButton}>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handlePhotoChange}
+                className={styles.fileInput}
+              />
+              📷 {t('addPhotos')} ({photos.length}/5)
+            </label>
+          )}
+        </div>
 
         <button type="submit" disabled={loading} className={styles.submitButton}>
           {loading ? t('sending') : t('submit')}

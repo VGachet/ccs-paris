@@ -45,6 +45,15 @@ export const Bookings: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'photos',
+      type: 'upload',
+      relationTo: 'media',
+      hasMany: true,
+      admin: {
+        description: 'Photos du mobilier ou sol à nettoyer',
+      },
+    },
+    {
       name: 'status',
       type: 'select',
       options: [

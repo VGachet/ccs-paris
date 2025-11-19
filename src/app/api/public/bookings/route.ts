@@ -7,16 +7,18 @@ interface BookingData {
   lastName: string
   email: string
   phone: string
+  address: string
   service: string
   date: string
   message: string
-  locale: string
+  services: { [key: string]: number }
+  photos?: string[]
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { firstName, lastName, email, phone, service, date, message } = body as BookingData
+    const { firstName, lastName, email, phone, address, message, services, photos } = body as BookingData
 
     const payload = await getPayload({ config: configPromise })
 
@@ -28,9 +30,11 @@ export async function POST(request: NextRequest) {
         lastName,
         email,
         phone,
-        service,
-        date,
+        address,
+        service: JSON.stringify(services),
+        date: new Date().toISOString(),
         message,
+        photos: photos || [],
         status: 'pending',
       },
     })

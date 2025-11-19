@@ -45,7 +45,11 @@
     "error": "✗ An error occurred",
     "callNow": "Call now",
     "whatsapp": "WhatsApp",
-    "or": "Or"
+    "or": "Or",
+    "photos": "Photos of furniture/floor (optional)",
+    "photosDescription": "Add photos to help us better assess your needs",
+    "addPhotos": "Add photos",
+    "maxPhotos": "Maximum 5 photos"
   },
   "blog": {
     "title": "Blog",
