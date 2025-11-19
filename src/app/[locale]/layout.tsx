@@ -5,6 +5,7 @@ import { getMessages } from 'next-intl/server'
 import { routing } from '@/i18n/routing'
 import { Header } from '@/app/(frontend)/components/common/Header'
 import { Footer } from '@/app/(frontend)/components/common/Footer'
+import { PromoBanner } from '@/app/(frontend)/components/common/PromoBanner'
 import { getSiteSettings } from '@/lib/cms'
 import { Lato, Playfair_Display } from 'next/font/google'
 import '../(frontend)/styles.css'
@@ -46,6 +47,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} className={`${lato.variable} ${playfairDisplay.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
+          <PromoBanner />
           <Header siteSettings={siteSettings} />
           {children}
           <Footer />

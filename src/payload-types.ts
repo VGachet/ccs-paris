@@ -76,6 +76,7 @@ export interface Config {
     features: Feature;
     testimonials: Testimonial;
     'legal-pages': LegalPage;
+    promotions: Promotion;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -91,6 +92,7 @@ export interface Config {
     features: FeaturesSelect<false> | FeaturesSelect<true>;
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
+    promotions: PromotionsSelect<false> | PromotionsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -236,6 +238,10 @@ export interface Page {
 export interface Service {
   id: string;
   /**
+   * Ordre d'affichage (les nombres les plus petits apparaissent en premier)
+   */
+  order: number;
+  /**
    * Nom du service
    */
   name: string;
@@ -276,9 +282,17 @@ export interface Service {
    */
   pricing?: string | null;
   /**
-   * Nombre de colonnes que prend ce service dans la grille
+   * Prix du service en euros (pour afficher le prix avec réduction)
    */
-  columnSpan?: ('1' | '2' | '3') | null;
+  price?: number | null;
+  /**
+   * Afficher "À partir de" avant le prix
+   */
+  pricePrefix?: boolean | null;
+  /**
+   * Nombre de colonnes que prend ce service dans la grille (grille de 4 colonnes)
+   */
+  columnSpan?: ('1' | '2' | '3' | '4') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -439,7 +453,7 @@ export interface LegalPage {
   /**
    * Sélectionner le type de page légale
    */
-  slug: 'privacy-policy' | 'terms-of-service';
+  slug: 'legal-notices' | 'general-terms';
   /**
    * Contenu de la page légale
    */
@@ -473,6 +487,43 @@ export interface LegalPage {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promotions".
+ */
+export interface Promotion {
+  id: string;
+  /**
+   * Titre de l'offre promotionnelle (ex: "Offre de lancement")
+   */
+  title: string;
+  /**
+   * Description de l'offre (optionnel)
+   */
+  description?: string | null;
+  /**
+   * Pourcentage de réduction (0-100) - Optionnel, laisser vide pour afficher uniquement un message
+   */
+  discountPercentage?: number | null;
+  /**
+   * Activer/désactiver l'affichage de l'offre
+   */
+  isActive: boolean;
+  /**
+   * Date de début de l'offre (optionnel)
+   */
+  startDate?: string | null;
+  /**
+   * Date de fin de l'offre (optionnel)
+   */
+  endDate?: string | null;
+  /**
+   * Couleur de l'encart promotionnel
+   */
+  bannerColor?: ('primary' | 'red' | 'green' | 'orange') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -516,6 +567,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'legal-pages';
         value: string | LegalPage;
+      } | null)
+    | ({
+        relationTo: 'promotions';
+        value: string | Promotion;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -638,6 +693,7 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
+  order?: T;
   name?: T;
   slug?: T;
   description?: T;
@@ -646,6 +702,8 @@ export interface ServicesSelect<T extends boolean = true> {
   beforeImage?: T;
   afterImage?: T;
   pricing?: T;
+  price?: T;
+  pricePrefix?: T;
   columnSpan?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -729,6 +787,21 @@ export interface LegalPagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promotions_select".
+ */
+export interface PromotionsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  discountPercentage?: T;
+  isActive?: T;
+  startDate?: T;
+  endDate?: T;
+  bannerColor?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -848,6 +921,32 @@ export interface SiteSetting {
    * Description qui apparaît dans les résultats de recherche
    */
   aboutMetaDescription?: string | null;
+  /**
+   * Contenu affiché sous le titre de la page Tarifs/Pricing
+   */
+  pricingIntroText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Titre qui apparaît dans les résultats de recherche
+   */
+  pricingMetaTitle?: string | null;
+  /**
+   * Description qui apparaît dans les résultats de recherche
+   */
+  pricingMetaDescription?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -869,6 +968,9 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   aboutText?: T;
   aboutMetaTitle?: T;
   aboutMetaDescription?: T;
+  pricingIntroText?: T;
+  pricingMetaTitle?: T;
+  pricingMetaDescription?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

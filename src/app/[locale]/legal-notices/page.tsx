@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import styles from './legal.module.css'
+import { redirect } from 'next/navigation'
 
 interface Props {
   params: Promise<{ locale: string }>
@@ -10,6 +11,14 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
+  
+  // Rediriger si on n'est pas en anglais
+  if (locale !== 'en') {
+    return {
+      title: 'Redirect',
+    }
+  }
+  
   const payload = await getPayload({ config: configPromise })
 
   try {
@@ -17,10 +26,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       collection: 'legal-pages',
       where: {
         slug: {
-          equals: 'terms-of-service',
+          equals: 'legal-notices',
         },
       },
-      locale: locale as 'fr' | 'en',
+      locale: 'en',
       limit: 1,
     })
 
@@ -38,13 +47,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const t = await getTranslations({ locale, namespace: 'legal' })
   return {
-    title: t('termsOfService'),
-    description: t('termsOfService'),
+    title: t('legalNotices'),
+    description: t('legalNotices'),
   }
 }
 
-export default async function TermsOfServicePage({ params }: Props) {
+export default async function LegalNoticesPageEN({ params }: Props) {
   const { locale } = await params
+  
+  // Rediriger vers la version française si la langue n'est pas anglaise
+  if (locale !== 'en') {
+    redirect(`/${locale}/mentions-legales`)
+  }
+  
   const t = await getTranslations('legal')
   const payload = await getPayload({ config: configPromise })
 
@@ -55,10 +70,10 @@ export default async function TermsOfServicePage({ params }: Props) {
       collection: 'legal-pages',
       where: {
         slug: {
-          equals: 'terms-of-service',
+          equals: 'legal-notices',
         },
       },
-      locale: locale as 'fr' | 'en',
+      locale: 'en',
       limit: 1,
     })
 
@@ -70,7 +85,7 @@ export default async function TermsOfServicePage({ params }: Props) {
   if (!pageData) {
     return (
       <main className={styles.container}>
-        <h1>{t('termsOfService')}</h1>
+        <h1>{t('legalNotices')}</h1>
         <div className={styles.placeholder}>
           <p>{t('noContentYet')}</p>
           <p>{t('addContentInCMS')}</p>
@@ -84,7 +99,7 @@ export default async function TermsOfServicePage({ params }: Props) {
       <h1>{pageData.title}</h1>
       {pageData.lastUpdated && (
         <p className={styles.lastUpdated}>
-          {t('lastUpdated')}: {new Date(pageData.lastUpdated).toLocaleDateString(locale)}
+          {t('lastUpdated')}: {new Date(pageData.lastUpdated).toLocaleDateString('en')}
         </p>
       )}
       <div className={styles.content}>
@@ -114,7 +129,7 @@ interface LexicalContent {
 
 function renderLexicalContent(content: LexicalContent): string {
   if (!content || !content.root || !content.root.children) {
-    return '<p>Contenu \u00e0 ajouter via le panel d\'administration Payload CMS</p>'
+    return '<p>Content to be added via Payload CMS admin panel</p>'
   }
 
   const renderNode = (node: LexicalNode): string => {
@@ -154,6 +169,6 @@ function renderLexicalContent(content: LexicalContent): string {
     return content.root.children.map(renderNode).join('')
   } catch (e) {
     console.error('Error rendering Lexical content:', e)
-    return '<p>Erreur lors du rendu du contenu</p>'
+    return '<p>Error rendering content</p>'
   }
 }

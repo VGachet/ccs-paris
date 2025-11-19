@@ -1,0 +1,174 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  min-height: 60vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.header p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.servicesList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.serviceItem {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.serviceItem:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.serviceInfo {
+  flex: 1;
+}
+
+.serviceName {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: #333;
+}
+
+.serviceDescription {
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.serviceDescription p {
+  margin: 0;
+}
+
+.servicePricing {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  min-width: fit-content;
+}
+
+.priceContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pricePrefix {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary, #1a1a1a);
+}
+
+.originalPrice {
+  font-size: 1.5rem;
+  color: #999;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.discountedPrice {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #059669;
+}
+
+.discountBadge {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.pricingText {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-accent, #d4af37);
+}
+
+.loading {
+  text-align: center;
+  padding: 4rem 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 2rem 1rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .serviceItem {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+
+  .serviceName {
+    font-size: 1.5rem;
+  }
+
+  .servicePricing {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .priceContainer {
+    justify-content: flex-start;
+  }
+
+  .price,
+  .discountedPrice {
+    font-size: 1.75rem;
+  }
+
+  .originalPrice {
+    font-size: 1.25rem;
+  }
+}

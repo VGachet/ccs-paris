@@ -6,6 +6,7 @@
     "reservations": "Réservations",
     "contact": "Contact",
     "about": "À Propos",
+    "pricing": "Tarifs",
     "language": "Langue",
     "french": "Français",
     "english": "English"
@@ -21,7 +22,8 @@
     "carpetCleaning": "Nettoyage de tapis",
     "sofaCleaning": "Nettoyage de canapé",
     "autoSeats": "Nettoyage de sièges auto",
-    "other": "Autres services"
+    "other": "Autres services",
+    "from": "À partir de"
   },
   "booking": {
     "title": "Demander une réservation",
@@ -57,16 +59,23 @@
     "rights": "Tous droits réservés",
     "followUs": "Nous suivre",
     "contact": "Nous contacter",
-    "privacyPolicy": "Politique de confidentialité",
-    "termsOfService": "Conditions générales d'utilisation"
+    "legalNotices": "Mentions légales",
+    "generalTerms": "Conditions Générales"
   },
   "legal": {
     "loading": "Chargement...",
     "noContentYet": "Aucun contenu disponible pour le moment.",
     "addContentInCMS": "Vous pouvez ajouter le contenu via le panel d'administration Payload CMS.",
     "lastUpdated": "Dernière mise à jour",
-    "privacyPolicy": "Politique de confidentialité",
-    "termsOfService": "Conditions générales d'utilisation"
+    "legalNotices": "Mentions légales",
+    "generalTerms": "Conditions Générales"
+  },
+  "pricing": {
+    "title": "Nos Tarifs",
+    "description": "Découvrez nos tarifs pour tous nos services de nettoyage textile",
+    "from": "À partir de",
+    "noServices": "Aucun service disponible pour le moment.",
+    "bookNow": "Réserver maintenant"
   },
   "notFound": {
     "title": "Page introuvable",

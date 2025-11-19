@@ -63,6 +63,7 @@ export async function getServices(locale: Locale = 'fr') {
     const services = await payload.find({
       collection: 'services' as any,
       limit: 50,
+      sort: 'order',
       locale,
     })
     return services.docs || []

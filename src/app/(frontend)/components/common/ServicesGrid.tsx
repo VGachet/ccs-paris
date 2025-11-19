@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import styles from './ServicesGrid.module.css'
 
@@ -20,17 +21,26 @@ interface Service {
   beforeImage?: MediaItem
   afterImage?: MediaItem
   pricing?: string
-  columnSpan?: '1' | '2' | '3'
+  price?: number
+  pricePrefix?: boolean
+  columnSpan?: '1' | '2' | '3' | '4'
+}
+
+interface Promotion {
+  id: string
+  discountPercentage?: number
 }
 
 export function ServicesGrid() {
   const [services, setServices] = useState<Service[]>([])
+  const [promotion, setPromotion] = useState<Promotion | null>(null)
   const [loading, setLoading] = useState(true)
   const [sliderPositions, setSliderPositions] = useState<Record<string, number>>({})
   const [isDragging, setIsDragging] = useState<string | null>(null)
   const [playingVideos, setPlayingVideos] = useState<Record<string, boolean>>({})
   const params = useParams()
   const locale = (params?.locale as string) || 'fr'
+  const t = useTranslations('services')
 
   const handleMouseDown = (serviceId: string) => {
     setIsDragging(serviceId)
@@ -108,8 +118,25 @@ export function ServicesGrid() {
         setLoading(false)
       }
     }
+    
+    async function fetchPromotion() {
+      try {
+        const response = await fetch('/api/public/promotions')
+        const data = await response.json()
+        setPromotion(data.promotion)
+      } catch (error) {
+        console.error('Error fetching promotion:', error)
+      }
+    }
+    
     fetchServices()
+    fetchPromotion()
   }, [locale])
+
+  const calculateDiscountedPrice = (price: number): number => {
+    if (!promotion || !promotion.discountPercentage) return price
+    return price * (1 - promotion.discountPercentage / 100)
+  }
 
   if (loading) {
     return (
@@ -241,7 +268,25 @@ export function ServicesGrid() {
                     {service.description}
                   </div>
                 )}
-                {service.pricing && (
+                {service.price && (
+                  <div className={styles.priceContainer}>
+                    {service.pricePrefix && (
+                      <span className={styles.pricePrefix}>{t('from')}</span>
+                    )}
+                    {promotion && promotion.discountPercentage ? (
+                      <>
+                        <span className={styles.originalPrice}>{service.price.toFixed(2)}€</span>
+                        <span className={styles.discountedPrice}>
+                          {calculateDiscountedPrice(service.price).toFixed(2)}€
+                        </span>
+                        <span className={styles.discountBadge}>-{promotion.discountPercentage}%</span>
+                      </>
+                    ) : (
+                      <span className={styles.servicePricing}>{service.price.toFixed(2)}€</span>
+                    )}
+                  </div>
+                )}
+                {!service.price && service.pricing && (
                   <p className={styles.servicePricing}>{service.pricing}</p>
                 )}
               </div>

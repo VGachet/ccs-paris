@@ -57,6 +57,7 @@ export const Header = ({ siteSettings }: HeaderProps) => {
           {/* Navigation desktop */}
           <nav className={styles.nav}>
             <Link href="/">{t('home')}</Link>
+            <Link href="/tarifs">{t('pricing')}</Link>
             <Link href="/about">{t('about')}</Link>
             <Link href="/blog">{t('blog')}</Link>
           </nav>
@@ -84,6 +85,9 @@ export const Header = ({ siteSettings }: HeaderProps) => {
             <nav className={styles.mobileNav}>
               <Link href="/" onClick={closeMobileMenu}>
                 {t('home')}
+              </Link>
+              <Link href="/tarifs" onClick={closeMobileMenu}>
+                {t('pricing')}
               </Link>
               <Link href="/about" onClick={closeMobileMenu}>
                 {t('about')}

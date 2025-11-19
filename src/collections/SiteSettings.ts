@@ -153,6 +153,39 @@ export const SiteSettings: GlobalConfig = {
             },
           ],
         },
+        {
+          label: 'Tarifs',
+          fields: [
+            {
+              name: 'pricingIntroText',
+              type: 'richText',
+              editor: lexicalEditor(),
+              label: 'Texte d\'introduction aux tarifs',
+              localized: true,
+              admin: {
+                description: 'Contenu affiché sous le titre de la page Tarifs/Pricing',
+              },
+            },
+            {
+              name: 'pricingMetaTitle',
+              type: 'text',
+              label: 'Titre SEO de la page tarifs',
+              localized: true,
+              admin: {
+                description: 'Titre qui apparaît dans les résultats de recherche',
+              },
+            },
+            {
+              name: 'pricingMetaDescription',
+              type: 'textarea',
+              label: 'Description SEO de la page tarifs',
+              localized: true,
+              admin: {
+                description: 'Description qui apparaît dans les résultats de recherche',
+              },
+            },
+          ],
+        },
       ],
     },
   ],

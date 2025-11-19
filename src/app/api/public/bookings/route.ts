@@ -16,7 +16,7 @@ interface BookingData {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { firstName, lastName, email, phone, service, date, message, locale } = body as BookingData
+    const { firstName, lastName, email, phone, service, date, message } = body as BookingData
 
     const payload = await getPayload({ config: configPromise })
 

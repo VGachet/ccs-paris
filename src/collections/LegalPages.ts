@@ -24,12 +24,12 @@ export const LegalPages: CollectionConfig = {
       required: true,
       options: [
         {
-          label: 'Politique de confidentialité',
-          value: 'privacy-policy',
+          label: 'Mentions légales',
+          value: 'legal-notices',
         },
         {
-          label: 'Conditions générales d\'utilisation',
-          value: 'terms-of-service',
+          label: 'Conditions Générales',
+          value: 'general-terms',
         },
       ],
       admin: {

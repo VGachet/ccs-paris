@@ -6,6 +6,7 @@
     "reservations": "Reservations",
     "contact": "Contact",
     "about": "About",
+    "pricing": "Pricing",
     "language": "Language",
     "french": "Français",
     "english": "English"
@@ -21,7 +22,8 @@
     "carpetCleaning": "Carpet Cleaning",
     "sofaCleaning": "Sofa Cleaning",
     "autoSeats": "Auto Seat Cleaning",
-    "other": "Other services"
+    "other": "Other services",
+    "from": "From"
   },
   "booking": {
     "title": "Request a Reservation",
@@ -57,16 +59,23 @@
     "rights": "All rights reserved",
     "followUs": "Follow us",
     "contact": "Contact us",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "legalNotices": "Legal Notices",
+    "generalTerms": "General Terms"
   },
   "legal": {
     "loading": "Loading...",
     "noContentYet": "No content available yet.",
     "addContentInCMS": "You can add content via the Payload CMS admin panel.",
     "lastUpdated": "Last updated",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "legalNotices": "Legal Notices",
+    "generalTerms": "General Terms"
+  },
+  "pricing": {
+    "title": "Our Pricing",
+    "description": "Discover our prices for all our textile cleaning services",
+    "from": "From",
+    "noServices": "No services available at the moment.",
+    "bookNow": "Book Now"
   },
   "notFound": {
     "title": "Page not found",
