@@ -55,8 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LegalNoticesPageEN({ params }: Props) {
   const { locale } = await params
   
-  // Rediriger vers la version française si la langue n'est pas anglaise
-  if (locale !== 'en') {
+  // Rediriger vers la version française si on accède à cette route sans rewrite
+  // Le middleware devrait normalement faire le rewrite, mais au cas où...
+  if (locale === 'fr') {
     redirect(`/${locale}/mentions-legales`)
   }
   

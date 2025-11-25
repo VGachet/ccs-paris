@@ -11,14 +11,18 @@ interface Promotion {
   bannerColor?: 'primary' | 'red' | 'green' | 'orange'
 }
 
-export const PromoBanner = () => {
+interface PromoBannerProps {
+  locale: string
+}
+
+export const PromoBanner = ({ locale }: PromoBannerProps) => {
   const [promotion, setPromotion] = useState<Promotion | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const fetchPromotion = async () => {
       try {
-        const response = await fetch('/api/public/promotions')
+        const response = await fetch(`/api/public/promotions?locale=${locale}`)
         const data = await response.json()
         setPromotion(data.promotion)
       } catch (error) {
@@ -29,7 +33,7 @@ export const PromoBanner = () => {
     }
 
     fetchPromotion()
-  }, [])
+  }, [locale])
 
   if (isLoading || !promotion) {
     return null

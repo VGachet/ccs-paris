@@ -47,7 +47,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     <html lang={locale} className={`${lato.variable} ${playfairDisplay.variable}`}>
       <body>
         <NextIntlClientProvider messages={messages}>
-          <PromoBanner />
+          <PromoBanner locale={locale} />
           <Header siteSettings={siteSettings} />
           {children}
           <Footer />

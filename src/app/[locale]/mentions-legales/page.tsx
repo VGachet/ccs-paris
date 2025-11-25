@@ -12,13 +12,6 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   
-  // Rediriger si on n'est pas en français
-  if (locale !== 'fr') {
-    return {
-      title: 'Redirect',
-    }
-  }
-  
   const payload = await getPayload({ config: configPromise })
 
   try {
@@ -29,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           equals: 'legal-notices',
         },
       },
-      locale: 'fr',
+      locale: locale as 'fr' | 'en',
       limit: 1,
     })
 
@@ -55,10 +48,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LegalNoticesPageFR({ params }: Props) {
   const { locale } = await params
   
-  // Rediriger vers la version anglaise si la langue n'est pas française
-  if (locale !== 'fr') {
-    redirect(`/${locale}/legal-notices`)
-  }
+  // Cette page gère les deux langues car le middleware fait un rewrite
+  // /en/legal-notices -> /en/mentions-legales
   
   const t = await getTranslations('legal')
   const payload = await getPayload({ config: configPromise })
@@ -73,7 +64,7 @@ export default async function LegalNoticesPageFR({ params }: Props) {
           equals: 'legal-notices',
         },
       },
-      locale: 'fr',
+      locale: locale as 'fr' | 'en',
       limit: 1,
     })
 

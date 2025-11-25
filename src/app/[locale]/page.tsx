@@ -152,7 +152,8 @@ function renderLexicalContent(content: LexicalContent): string {
       return `<p>${children}</p>`
     }
     if (node.type === 'heading') {
-      const tag = `h${node.tag || '2'}`
+      // node.tag contient déjà "h1", "h2", etc. dans Lexical
+      const tag = node.tag || 'h2'
       const children = node.children?.map(renderNode).join('') || ''
       return `<${tag}>${children}</${tag}>`
     }
