@@ -31,6 +31,11 @@ export const Bookings: CollectionConfig = {
       required: true,
     },
     {
+      name: 'address',
+      type: 'text',
+      required: true,
+    },
+    {
       name: 'service',
       type: 'text',
       required: true,

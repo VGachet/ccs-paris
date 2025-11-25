@@ -355,6 +355,7 @@ export interface Booking {
   lastName: string;
   email: string;
   phone: string;
+  address: string;
   service: string;
   date: string;
   message?: string | null;
@@ -740,6 +741,7 @@ export interface BookingsSelect<T extends boolean = true> {
   lastName?: T;
   email?: T;
   phone?: T;
+  address?: T;
   service?: T;
   date?: T;
   message?: T;
