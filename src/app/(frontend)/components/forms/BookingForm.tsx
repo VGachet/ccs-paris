@@ -116,6 +116,7 @@ export const BookingForm = ({
         }
       }
 
+      //TODO: SEND AN EMAIL WITH THE BOOKING DETAILS + SAVE BOKKINGS (NEED TO RECREATYE THE BOOKING COLLECTIONS - not avaialble in the admin pannel)
       const response = await fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

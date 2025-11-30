@@ -6,6 +6,7 @@ import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import { resendAdapter } from '@payloadcms/email-resend'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -58,4 +59,9 @@ export default buildConfig({
     payloadCloudPlugin(),
     // storage-adapter-placeholder
   ],
+  email: resendAdapter({
+    defaultFromAddress: 'contact@ccs-paris.fr',
+    defaultFromName: 'CCS Paris',
+    apiKey: process.env.RESEND_API_KEY || '',
+  }),
 })

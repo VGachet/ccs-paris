@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@payloadcms/db-mongodb": "3.60.0",
+    "@payloadcms/email-resend": "^3.65.0",
     "@payloadcms/next": "3.60.0",
     "@payloadcms/payload-cloud": "3.60.0",
     "@payloadcms/richtext-lexical": "3.60.0",
@@ -31,7 +32,7 @@
     "payload": "3.60.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "resend": "^6.3.0",
+    "resend": "^6.5.2",
     "sharp": "^0.34.4"
   },
   "devDependencies": {
