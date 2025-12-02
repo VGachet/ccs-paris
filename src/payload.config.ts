@@ -19,6 +19,7 @@ import { LegalPages } from './collections/LegalPages'
 import { Testimonials } from './collections/Testimonials'
 import { SiteSettings } from './collections/SiteSettings'
 import { Promotions } from './collections/Promotions'
+import { TimeSlots } from './collections/TimeSlots'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -30,7 +31,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages, Services, Blog, Bookings, Features, Testimonials, LegalPages, Promotions],
+  collections: [Users, Media, Pages, Services, Blog, Bookings, Features, Testimonials, LegalPages, Promotions, TimeSlots],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

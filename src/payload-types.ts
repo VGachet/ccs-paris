@@ -77,6 +77,7 @@ export interface Config {
     testimonials: Testimonial;
     'legal-pages': LegalPage;
     promotions: Promotion;
+    'time-slots': TimeSlot;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -93,6 +94,7 @@ export interface Config {
     testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     'legal-pages': LegalPagesSelect<false> | LegalPagesSelect<true>;
     promotions: PromotionsSelect<false> | PromotionsSelect<true>;
+    'time-slots': TimeSlotsSelect<false> | TimeSlotsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -346,6 +348,8 @@ export interface Blog {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * Liste des demandes de réservation reçues via le formulaire de contact
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "bookings".
  */
@@ -356,14 +360,69 @@ export interface Booking {
   email: string;
   phone: string;
   address: string;
-  service: string;
+  primaryService: {
+    serviceId: string | Service;
+    quantity: number;
+    price?: number | null;
+  };
+  /**
+   * Ancien format pour compatibilité - utiliser secondaryServices
+   */
+  secondaryService?: {
+    hasSecondaryService?: boolean | null;
+    serviceId?: (string | null) | Service;
+    quantity?: number | null;
+    price?: number | null;
+    discountedPrice?: number | null;
+  };
+  /**
+   * Services additionnels avec réduction appliquée
+   */
+  secondaryServices?:
+    | {
+        serviceId: string | Service;
+        quantity: number;
+        price: number;
+        discountPercent?: number | null;
+        discountedPrice?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Pourcentage de réduction appliqué aux services supplémentaires
+   */
+  discountPercent?: number | null;
+  /**
+   * Format texte pour compatibilité avec anciennes réservations
+   */
+  service?: string | null;
+  /**
+   * Créneaux horaires réservés
+   */
+  timeSlots?:
+    | {
+        date: string;
+        startTime: string;
+        endTime: string;
+        id?: string | null;
+      }[]
+    | null;
   date: string;
   message?: string | null;
   /**
    * Photos du mobilier ou sol à nettoyer
    */
   photos?: (string | Media)[] | null;
-  status?: ('pending' | 'contacted' | 'completed') | null;
+  /**
+   * Montant total calculé (hors frais supplémentaires)
+   */
+  totalAmount?: number | null;
+  status?: ('pending' | 'contacted' | 'confirmed' | 'completed' | 'cancelled') | null;
+  /**
+   * Notes internes (non visibles par le client)
+   */
+  notes?: string | null;
+  clientEmailSent?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -531,6 +590,42 @@ export interface Promotion {
   createdAt: string;
 }
 /**
+ * Gérez les créneaux horaires disponibles pour les réservations
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "time-slots".
+ */
+export interface TimeSlot {
+  id: string;
+  displayTitle?: string | null;
+  /**
+   * Date du créneau
+   */
+  date: string;
+  /**
+   * Heure de début du créneau (durée: 2h)
+   */
+  startTime: '09:00' | '11:00' | '13:00' | '15:00' | '17:00';
+  /**
+   * Heure de fin du créneau
+   */
+  endTime: '11:00' | '13:00' | '15:00' | '17:00' | '19:00';
+  /**
+   * Statut actuel du créneau
+   */
+  status: 'available' | 'blocked' | 'pending' | 'confirmed';
+  /**
+   * Réservation liée à ce créneau (si applicable)
+   */
+  bookingId?: (string | null) | Booking;
+  /**
+   * Notes internes (raison du blocage, etc.)
+   */
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
@@ -576,6 +671,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'promotions';
         value: string | Promotion;
+      } | null)
+    | ({
+        relationTo: 'time-slots';
+        value: string | TimeSlot;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -742,11 +841,49 @@ export interface BookingsSelect<T extends boolean = true> {
   email?: T;
   phone?: T;
   address?: T;
+  primaryService?:
+    | T
+    | {
+        serviceId?: T;
+        quantity?: T;
+        price?: T;
+      };
+  secondaryService?:
+    | T
+    | {
+        hasSecondaryService?: T;
+        serviceId?: T;
+        quantity?: T;
+        price?: T;
+        discountedPrice?: T;
+      };
+  secondaryServices?:
+    | T
+    | {
+        serviceId?: T;
+        quantity?: T;
+        price?: T;
+        discountPercent?: T;
+        discountedPrice?: T;
+        id?: T;
+      };
+  discountPercent?: T;
   service?: T;
+  timeSlots?:
+    | T
+    | {
+        date?: T;
+        startTime?: T;
+        endTime?: T;
+        id?: T;
+      };
   date?: T;
   message?: T;
   photos?: T;
+  totalAmount?: T;
   status?: T;
+  notes?: T;
+  clientEmailSent?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -807,6 +944,21 @@ export interface PromotionsSelect<T extends boolean = true> {
   startDate?: T;
   endDate?: T;
   bannerColor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "time-slots_select".
+ */
+export interface TimeSlotsSelect<T extends boolean = true> {
+  displayTitle?: T;
+  date?: T;
+  startTime?: T;
+  endTime?: T;
+  status?: T;
+  bookingId?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -929,6 +1081,10 @@ export interface SiteSetting {
    */
   aboutMetaDescription?: string | null;
   /**
+   * Pourcentage de réduction appliqué aux services supplémentaires lors d'une réservation (ex: 20 = -20%)
+   */
+  additionalServiceDiscount?: number | null;
+  /**
    * Contenu affiché sous le titre de la page Tarifs/Pricing
    */
   pricingIntroText?: {
@@ -975,6 +1131,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   aboutText?: T;
   aboutMetaTitle?: T;
   aboutMetaDescription?: T;
+  additionalServiceDiscount?: T;
   pricingIntroText?: T;
   pricingMetaTitle?: T;
   pricingMetaDescription?: T;

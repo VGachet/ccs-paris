@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Image from 'next/image'
-import { BookingForm } from '@/app/(frontend)/components/forms/BookingForm'
+import { BookingFormV2 } from '@/app/(frontend)/components/forms/BookingFormV2'
 import { WhyChooseUs } from '@/app/(frontend)/components/common/WhyChooseUs'
 import { ServicesGrid } from '@/app/(frontend)/components/common/ServicesGrid'
 import type { Media } from '@/payload-types'
@@ -110,10 +110,9 @@ export default async function HomePage({ params }: Props) {
 
       <section id="booking-form" className="booking-section">
         <div className="container">
-          <BookingForm
+          <BookingFormV2
             title={t('booking.title')}
             description={t('booking.description')}
-            variant="default"
           />
         </div>
       </section>

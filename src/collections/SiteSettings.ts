@@ -154,6 +154,23 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
         {
+          label: 'Réservations',
+          fields: [
+            {
+              name: 'additionalServiceDiscount',
+              type: 'number',
+              label: 'Réduction services additionnels (%)',
+              defaultValue: 20,
+              min: 0,
+              max: 100,
+              admin: {
+                description: 'Pourcentage de réduction appliqué aux services supplémentaires lors d\'une réservation (ex: 20 = -20%)',
+                step: 1,
+              },
+            },
+          ],
+        },
+        {
           label: 'Tarifs',
           fields: [
             {
