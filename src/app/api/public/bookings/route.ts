@@ -2,6 +2,23 @@ import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+// Regex pour la validation
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+const PHONE_REGEX = /^(?:(?:\+|00)33[\s.-]?|0)[1-9](?:[\s.-]?\d{2}){4}$/
+
+// Fonction de validation de l'email
+function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email.trim())
+}
+
+// Fonction de validation du téléphone (format français)
+function isValidPhone(phone: string): boolean {
+  // Nettoyer le numéro des espaces et caractères spéciaux pour la validation
+  const cleanedPhone = phone.replace(/[\s.-]/g, '')
+  // Accepter les formats: +33, 0033, ou 0 suivi de 9 chiffres
+  return /^(?:(?:\+|00)33|0)[1-9]\d{8}$/.test(cleanedPhone)
+}
+
 interface TimeSlotData {
   date: string
   startTime: string
@@ -321,6 +338,30 @@ export async function POST(request: NextRequest) {
       services, 
       photos 
     } = body as BookingData
+
+    // Validation des champs obligatoires
+    if (!firstName || !lastName || !email || !phone || !address) {
+      return Response.json(
+        { error: 'Tous les champs obligatoires doivent être remplis' },
+        { status: 400 }
+      )
+    }
+
+    // Validation de l'email
+    if (!isValidEmail(email)) {
+      return Response.json(
+        { error: 'Adresse email invalide' },
+        { status: 400 }
+      )
+    }
+
+    // Validation du téléphone
+    if (!isValidPhone(phone)) {
+      return Response.json(
+        { error: 'Numéro de téléphone invalide. Format attendu: 06 12 34 56 78 ou +33 6 12 34 56 78' },
+        { status: 400 }
+      )
+    }
 
     const payload = await getPayload({ config: configPromise })
 

@@ -42,6 +42,21 @@ interface BookingFormV2Props {
   description?: string
 }
 
+// Regex pour la validation
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+const PHONE_REGEX = /^(?:(?:\+|00)33|0)[1-9]\d{8}$/
+
+// Fonction de validation de l'email
+const isValidEmail = (email: string): boolean => {
+  return EMAIL_REGEX.test(email.trim())
+}
+
+// Fonction de validation du téléphone (format français)
+const isValidPhone = (phone: string): boolean => {
+  const cleanedPhone = phone.replace(/[\s.-]/g, '')
+  return PHONE_REGEX.test(cleanedPhone)
+}
+
 // =====================================================
 // Composant Principal
 // =====================================================
@@ -74,21 +89,27 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   const [secondaryServices, setSecondaryServices] = useState<SecondaryServiceItem[]>([])
   const [discountPercent, setDiscountPercent] = useState(20) // Valeur par défaut
 
+  // Paramètres du site
+  const [phoneNumber, setPhoneNumber] = useState('+33651135174')
+  const [minimumOrderAmount, setMinimumOrderAmount] = useState(50)
+  const [messageHint, setMessageHint] = useState('')
+
+  // Acceptation des mentions légales
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+
   // État étape 3 - Créneaux
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<SelectedTimeSlot[]>([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
-  // État étape 4 - Coordonnées
+  // État étape 4 - Coordonnées (incluant l'adresse)
   const [contactInfo, setContactInfo] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    address: '',
   })
-
-  // État étape 5 - Adresse
-  const [address, setAddress] = useState('')
 
   // État étape 6 - Photos
   const [photos, setPhotos] = useState<File[]>([])
@@ -114,21 +135,30 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
     fetchServices()
   }, [locale])
 
-  // Charger le pourcentage de réduction depuis les paramètres du site
+  // Charger les paramètres du site (réduction, téléphone, minimum, messageHint)
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch('/api/public/site-settings')
+        const response = await fetch(`/api/public/site-settings?locale=${locale}`)
         const data = await response.json()
         if (data.additionalServiceDiscount !== undefined) {
           setDiscountPercent(data.additionalServiceDiscount)
+        }
+        if (data.phoneNumber) {
+          setPhoneNumber(data.phoneNumber)
+        }
+        if (data.minimumOrderAmount !== undefined) {
+          setMinimumOrderAmount(data.minimumOrderAmount)
+        }
+        if (data.messageHint) {
+          setMessageHint(data.messageHint)
         }
       } catch (error) {
         console.error('Error fetching site settings:', error)
       }
     }
     fetchSettings()
-  }, [])
+  }, [locale])
 
   // Charger les créneaux
   useEffect(() => {
@@ -190,34 +220,41 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         case 2:
           return wantsSecondService !== null && (wantsSecondService === false || secondaryServices.length > 0)
         case 3:
-          return selectedTimeSlots.length > 0
+          return true // Créneaux optionnels
         case 4:
           return (
             contactInfo.firstName.trim() !== '' &&
             contactInfo.lastName.trim() !== '' &&
             contactInfo.email.trim() !== '' &&
-            contactInfo.phone.trim() !== ''
+            isValidEmail(contactInfo.email) &&
+            contactInfo.phone.trim() !== '' &&
+            isValidPhone(contactInfo.phone) &&
+            contactInfo.address.trim() !== ''
           )
         case 5:
-          return address.trim() !== ''
-        case 6:
           return true // Photos optionnelles
-        case 7:
+        case 6:
           return true // Récapitulatif toujours valide
         default:
           return false
       }
     },
-    [primaryService, wantsSecondService, secondaryServices, selectedTimeSlots, contactInfo, address]
+    [primaryService, wantsSecondService, secondaryServices, contactInfo]
   )
 
   // Passer à l'étape suivante
   const goToNextStep = useCallback(() => {
     if (isStepComplete(activeStep)) {
       setCompletedSteps((prev) => [...new Set([...prev, activeStep])])
-      setActiveStep((prev) => Math.min(prev + 1, 7))
+      setActiveStep((prev) => Math.min(prev + 1, 6))
     }
   }, [activeStep, isStepComplete])
+
+  // Passer une étape optionnelle (créneaux)
+  const skipStep = useCallback(() => {
+    setCompletedSteps((prev) => [...new Set([...prev, activeStep])])
+    setActiveStep((prev) => Math.min(prev + 1, 6))
+  }, [activeStep])
 
   // =====================================================
   // Gestion des services
@@ -400,7 +437,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   // =====================================================
 
   const handleSubmit = async () => {
-    if (!primaryService || selectedTimeSlots.length === 0) {
+    if (!primaryService) {
       setError(t('fillRequired'))
       return
     }
@@ -433,8 +470,11 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...contactInfo,
-          address,
+          firstName: contactInfo.firstName,
+          lastName: contactInfo.lastName,
+          email: contactInfo.email,
+          phone: contactInfo.phone,
+          address: contactInfo.address,
           message,
           primaryService,
           secondaryServices: wantsSecondService && secondaryServices.length > 0 
@@ -444,7 +484,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
               }))
             : undefined,
           discountPercent,
-          timeSlots: selectedTimeSlots,
+          timeSlots: selectedTimeSlots.length > 0 ? selectedTimeSlots : undefined,
           totalAmount,
           photos: photoIds,
         }),
@@ -458,8 +498,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       setWantsSecondService(null)
       setSecondaryServices([])
       setSelectedTimeSlots([])
-      setContactInfo({ firstName: '', lastName: '', email: '', phone: '' })
-      setAddress('')
+      setContactInfo({ firstName: '', lastName: '', email: '', phone: '', address: '' })
       setMessage('')
       setPhotos([])
       setActiveStep(1)
@@ -541,7 +580,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
 
   const renderStep2 = () => {
     // Fonction pour passer à l'étape suivante en marquant l'étape 2 comme complète
-    const skipToNextStep = () => {
+    const skipToStep3 = () => {
       setWantsSecondService(false)
       setSecondaryServices([])
       setCompletedSteps((prev) => [...new Set([...prev, 2])])
@@ -564,7 +603,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
           <button
             type="button"
             className={`${styles.promptButton} ${styles.no} ${wantsSecondService === false ? styles.selected : ''}`}
-            onClick={skipToNextStep}
+            onClick={skipToStep3}
           >
             {t('no')}
           </button>
@@ -868,84 +907,96 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             {t('continue')}
           </button>
         )}
+
+        {/* Bouton pour passer cette étape */}
+        <button
+          type="button"
+          className={styles.skipButton}
+          onClick={skipStep}
+        >
+          {t('skipTimeSlots')}
+        </button>
       </div>
     )
   }
 
-  const renderStep4 = () => (
-    <div className={styles.formFields}>
-      <div className={styles.formRow}>
-        <input
-          type="text"
-          className={styles.formInput}
-          placeholder={tCommon('firstName')}
-          value={contactInfo.firstName}
-          onChange={(e) => setContactInfo({ ...contactInfo, firstName: e.target.value })}
-          required
-        />
-        <input
-          type="text"
-          className={styles.formInput}
-          placeholder={tCommon('lastName')}
-          value={contactInfo.lastName}
-          onChange={(e) => setContactInfo({ ...contactInfo, lastName: e.target.value })}
-          required
-        />
+  const renderStep4 = () => {
+    const emailError = contactInfo.email.trim() !== '' && !isValidEmail(contactInfo.email)
+    const phoneError = contactInfo.phone.trim() !== '' && !isValidPhone(contactInfo.phone)
+
+    return (
+      <div className={styles.formFields}>
+        <div className={styles.formRow}>
+          <input
+            type="text"
+            className={styles.formInput}
+            placeholder={tCommon('firstName')}
+            value={contactInfo.firstName}
+            onChange={(e) => setContactInfo({ ...contactInfo, firstName: e.target.value })}
+            required
+          />
+          <input
+            type="text"
+            className={styles.formInput}
+            placeholder={tCommon('lastName')}
+            value={contactInfo.lastName}
+            onChange={(e) => setContactInfo({ ...contactInfo, lastName: e.target.value })}
+            required
+          />
+        </div>
+        <div className={styles.formRow}>
+          <div className={styles.inputWrapper}>
+            <input
+              type="email"
+              className={`${styles.formInput} ${emailError ? styles.inputError : ''}`}
+              placeholder={tCommon('email')}
+              value={contactInfo.email}
+              onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+              required
+            />
+            {emailError && (
+              <span className={styles.fieldError}>{t('invalidEmail')}</span>
+            )}
+          </div>
+          <div className={styles.inputWrapper}>
+            <input
+              type="tel"
+              className={`${styles.formInput} ${phoneError ? styles.inputError : ''}`}
+              placeholder={tCommon('phone')}
+              value={contactInfo.phone}
+              onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+              required
+            />
+            {phoneError && (
+              <span className={styles.fieldError}>{t('invalidPhone')}</span>
+            )}
+          </div>
+        </div>
+        <div className={styles.addressSection}>
+          <label className={styles.addressLabel}>📍 {t('addressLabel')}</label>
+          <input
+            type="text"
+            className={styles.formInput}
+            placeholder={tCommon('address')}
+            value={contactInfo.address}
+            onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value })}
+            required
+          />
+          <p className={styles.addressHint}>{t('addressHint')}</p>
+        </div>
+        <button
+          type="button"
+          className={styles.continueButton}
+          onClick={goToNextStep}
+          disabled={!isStepComplete(4)}
+        >
+          {t('continue')}
+        </button>
       </div>
-      <div className={styles.formRow}>
-        <input
-          type="email"
-          className={styles.formInput}
-          placeholder={tCommon('email')}
-          value={contactInfo.email}
-          onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
-          required
-        />
-        <input
-          type="tel"
-          className={styles.formInput}
-          placeholder={tCommon('phone')}
-          value={contactInfo.phone}
-          onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
-          required
-        />
-      </div>
-      <button
-        type="button"
-        className={styles.continueButton}
-        onClick={goToNextStep}
-        disabled={!isStepComplete(4)}
-      >
-        {t('continue')}
-      </button>
-    </div>
-  )
+    )
+  }
 
   const renderStep5 = () => (
-    <div className={styles.formFields}>
-      <input
-        type="text"
-        className={styles.formInput}
-        placeholder={tCommon('address')}
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        required
-      />
-      <p style={{ fontSize: '0.85rem', color: '#666', margin: '0.5rem 0 0 0' }}>
-        {t('addressHint')}
-      </p>
-      <button
-        type="button"
-        className={styles.continueButton}
-        onClick={goToNextStep}
-        disabled={!isStepComplete(5)}
-      >
-        {t('continue')}
-      </button>
-    </div>
-  )
-
-  const renderStep6 = () => (
     <div className={styles.photosSection}>
       <p className={styles.photosDescription}>{tCommon('photosDescription')}</p>
 
@@ -994,14 +1045,14 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       <button
         type="button"
         className={styles.skipButton}
-        onClick={goToNextStep}
+        onClick={skipStep}
       >
         {t('skipStep')}
       </button>
     </div>
   )
 
-  const renderStep7 = () => (
+  const renderStep6 = () => (
     <div className={styles.summary}>
       {/* Services */}
       <div className={styles.summaryCard}>
@@ -1036,24 +1087,34 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         )}
       </div>
 
-      {/* Créneaux */}
-      <div className={styles.summaryCard}>
-        <h4>📅 {t('selectedSlots')}</h4>
-        {selectedTimeSlots.map((slot, idx) => (
-          <div key={idx} className={styles.summaryRow}>
-            <span className={styles.summaryLabel}>
-              {new Date(slot.date).toLocaleDateString(locale, {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-              })}
-            </span>
-            <span className={styles.summaryValue}>
-              {slot.startTime} - {slot.endTime}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Créneaux - afficher seulement si des créneaux sont sélectionnés */}
+      {selectedTimeSlots.length > 0 && (
+        <div className={styles.summaryCard}>
+          <h4>📅 {t('selectedSlots')}</h4>
+          {selectedTimeSlots.map((slot, idx) => (
+            <div key={idx} className={styles.summaryRow}>
+              <span className={styles.summaryLabel}>
+                {new Date(slot.date).toLocaleDateString(locale, {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}
+              </span>
+              <span className={styles.summaryValue}>
+                {slot.startTime} - {slot.endTime}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Message si aucun créneau */}
+      {selectedTimeSlots.length === 0 && (
+        <div className={styles.summaryCard}>
+          <h4>📅 {t('selectedSlots')}</h4>
+          <p className={styles.noSlotsMessage}>{t('noSlotsSelected')}</p>
+        </div>
+      )}
 
       {/* Coordonnées */}
       <div className={styles.summaryCard}>
@@ -1072,16 +1133,15 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
           <span className={styles.summaryLabel}>{t('phoneLabel')}</span>
           <span className={styles.summaryValue}>{contactInfo.phone}</span>
         </div>
-      </div>
-
-      {/* Adresse */}
-      <div className={styles.summaryCard}>
-        <h4>📍 {t('addressLabel')}</h4>
-        <p style={{ margin: 0, color: '#333' }}>{address}</p>
+        <div className={styles.summaryRow}>
+          <span className={styles.summaryLabel}>{t('addressLabel')}</span>
+          <span className={styles.summaryValue}>{contactInfo.address}</span>
+        </div>
       </div>
 
       {/* Message optionnel */}
       <div className={styles.formFields}>
+        {messageHint && <p className={styles.messageHint}>{messageHint}</p>}
         <textarea
           className={styles.formTextarea}
           placeholder={tCommon('message')}
@@ -1092,16 +1152,56 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       </div>
 
       {/* Total */}
-      <div className={styles.summaryTotal}>
-        <span className={styles.label}>{t('estimatedTotal')}</span>
+      <div className={`${styles.summaryTotal} ${totalAmount < minimumOrderAmount ? styles.belowMinimum : ''}`}>
+        <span className={styles.label}>{t('total')}</span>
         <span className={styles.amount}>{totalAmount.toFixed(2)}€</span>
+      </div>
+
+      {/* Avertissement minimum de commande */}
+      {totalAmount < minimumOrderAmount && (
+        <div className={styles.minimumWarning}>
+          ⚠️ {t('minimumOrderWarning', { amount: minimumOrderAmount })}
+        </div>
+      )}
+
+      {/* Acceptation des mentions légales */}
+      <div className={`${styles.termsCheckbox} ${totalAmount < minimumOrderAmount ? styles.disabled : ''}`}>
+        <label className={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            disabled={totalAmount < minimumOrderAmount}
+            className={styles.checkbox}
+          />
+          <span className={styles.checkboxText}>
+            {t('acceptTerms')}{' '}
+            <a 
+              href={locale === 'fr' ? '/fr/mentions-legales' : '/en/legal-notices'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.termsLink}
+            >
+              {t('legalNoticesLink')}
+            </a>
+            {' '}{t('and')}{' '}
+            <a 
+              href={locale === 'fr' ? '/fr/conditions-generales' : '/en/general-terms'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.termsLink}
+            >
+              {t('generalTermsLink')}
+            </a>
+          </span>
+        </label>
       </div>
 
       <button
         type="button"
         className={styles.submitButton}
         onClick={handleSubmit}
-        disabled={loading}
+        disabled={loading || !acceptedTerms || totalAmount < minimumOrderAmount}
       >
         {loading ? (
           <>
@@ -1109,7 +1209,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             {tCommon('sending')}
           </>
         ) : (
-          <>✨ {t('confirmBooking')}</>
+          <>{t('confirmBooking')}</>
         )}
       </button>
     </div>
@@ -1119,10 +1219,13 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   // Rendu principal
   // =====================================================
 
-  const phoneNumber = '+33651135174'
   const whatsappMessage = encodeURIComponent(
-    'Bonjour, je souhaite obtenir un devis pour vos services de nettoyage.'
+    locale === 'fr' 
+      ? 'Bonjour, je souhaite obtenir un devis pour vos services de nettoyage.'
+      : 'Hello, I would like to get a quote for your cleaning services.'
   )
+  const phoneForLink = phoneNumber.replace(/[^\d+]/g, '')
+  const whatsappNumber = phoneForLink.replace('+', '')
 
   const steps = [
     { id: 1, title: t('step1Title'), subtitle: t('step1Subtitle') },
@@ -1131,7 +1234,6 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
     { id: 4, title: t('step4Title'), subtitle: t('step4Subtitle') },
     { id: 5, title: t('step5Title'), subtitle: t('step5Subtitle') },
     { id: 6, title: t('step6Title'), subtitle: t('step6Subtitle') },
-    { id: 7, title: t('step7Title'), subtitle: t('step7Subtitle') },
   ]
 
   const renderStepContent = (stepId: number) => {
@@ -1148,8 +1250,6 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         return renderStep5()
       case 6:
         return renderStep6()
-      case 7:
-        return renderStep7()
       default:
         return null
     }
@@ -1181,11 +1281,11 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
 
       {/* Boutons de contact rapide */}
       <div className={styles.contactButtons}>
-        <a href={`tel:${phoneNumber}`} className={styles.callButton}>
+        <a href={`tel:${phoneForLink}`} className={styles.callButton}>
           📞 {tCommon('callNow')}
         </a>
         <a
-          href={`https://wa.me/${phoneNumber.replace(/\+/g, '')}?text=${whatsappMessage}`}
+          href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
           target="_blank"
           rel="noopener noreferrer"
           className={styles.whatsappButton}

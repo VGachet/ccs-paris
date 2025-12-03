@@ -83,12 +83,10 @@ export default async function AboutPage({ params }: Props) {
       </section>
 
       <section className="booking-section">
-        <div className="container">
-          <BookingFormV2
-            title={t('booking.title')}
-            description={t('booking.description')}
-          />
-        </div>
+        <BookingFormV2
+          title={t('booking.title')}
+          description={t('booking.description')}
+        />
       </section>
     </main>
   )
@@ -123,7 +121,7 @@ function renderLexicalContent(content: LexicalContent): string {
       return `<p>${children}</p>`
     }
     if (node.type === 'heading') {
-      const tag = `h${node.tag || '2'}`
+      const tag = node.tag || 'h2'
       const children = node.children?.map(renderNode).join('') || ''
       return `<${tag}>${children}</${tag}>`
     }

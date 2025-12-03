@@ -109,12 +109,10 @@ export default async function HomePage({ params }: Props) {
       <ServicesGrid />
 
       <section id="booking-form" className="booking-section">
-        <div className="container">
-          <BookingFormV2
-            title={t('booking.title')}
-            description={t('booking.description')}
-          />
-        </div>
+        <BookingFormV2
+          title={t('booking.title')}
+          description={t('booking.description')}
+        />
       </section>
 
       <WhyChooseUs />

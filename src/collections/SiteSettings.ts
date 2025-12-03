@@ -157,6 +157,26 @@ export const SiteSettings: GlobalConfig = {
           label: 'Réservations',
           fields: [
             {
+              name: 'phoneNumber',
+              type: 'text',
+              label: 'Numéro de téléphone',
+              defaultValue: '+33651135174',
+              admin: {
+                description: 'Numéro de téléphone affiché sur le site (format: +33XXXXXXXXX)',
+              },
+            },
+            {
+              name: 'minimumOrderAmount',
+              type: 'number',
+              label: 'Montant minimum de commande (€)',
+              defaultValue: 50,
+              min: 0,
+              admin: {
+                description: 'Montant minimum requis pour pouvoir passer une réservation',
+                step: 1,
+              },
+            },
+            {
               name: 'additionalServiceDiscount',
               type: 'number',
               label: 'Réduction services additionnels (%)',
@@ -166,6 +186,16 @@ export const SiteSettings: GlobalConfig = {
               admin: {
                 description: 'Pourcentage de réduction appliqué aux services supplémentaires lors d\'une réservation (ex: 20 = -20%)',
                 step: 1,
+              },
+            },
+            {
+              name: 'messageHint',
+              type: 'textarea',
+              label: 'Indication message optionnel',
+              localized: true,
+              defaultValue: '💡 Recommandé si : tissu fragile (soie, velours...), taches spéciales/hors normes, dimensions particulières, ou accès difficile à l\'adresse',
+              admin: {
+                description: 'Texte affiché au-dessus du champ message dans le récapitulatif du formulaire de réservation',
               },
             },
           ],

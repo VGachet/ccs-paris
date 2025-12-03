@@ -1,6 +1,6 @@
 /* =====================================================
    BookingFormV2 - Formulaire de réservation optimisé
-   Système d'accordéon avec 7 étapes
+   Système d'accordéon avec 6 étapes
    ===================================================== */
 
 /* Container principal */
@@ -10,7 +10,7 @@
   padding: 0;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  max-width: 700px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -758,6 +758,38 @@
   color: #999;
 }
 
+/* Wrapper pour les inputs avec message d'erreur */
+.inputWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Style pour les inputs en erreur */
+.inputError {
+  border-color: #e53935 !important;
+  background-color: #fff5f5;
+}
+
+.inputError:focus {
+  border-color: #e53935 !important;
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.15) !important;
+}
+
+/* Message d'erreur sous le champ */
+.fieldError {
+  color: #e53935;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.fieldError::before {
+  content: '⚠';
+}
+
 .formTextarea {
   width: 100%;
   padding: 0.875rem 1rem;
@@ -776,8 +808,48 @@
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
+/* Indication pour le message optionnel */
+.messageHint {
+  font-size: 0.85rem;
+  color: #666;
+  background: #f8f9fa;
+  border-left: 3px solid #d4af37;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 0 8px 8px 0;
+  line-height: 1.4;
+}
+
+/* Section adresse intégrée dans les coordonnées */
+.addressSection {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.addressLabel {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.addressHint {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Message si aucun créneau sélectionné */
+.noSlotsMessage {
+  color: #888;
+  font-style: italic;
+  margin: 0;
+}
+
 /* =====================================================
-   Étape 6 - Photos
+   Étape 5 - Photos
    ===================================================== */
 
 .photosSection {
@@ -990,6 +1062,78 @@
 
 .skipButton:hover {
   color: #666;
+}
+
+/* Avertissement minimum de commande */
+.minimumWarning {
+  background: #fff3e0;
+  border: 1px solid #ffb74d;
+  color: #e65100;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Total en dessous du minimum */
+.summaryTotal.belowMinimum {
+  background: #ffebee;
+  border-color: #ef5350;
+}
+
+.summaryTotal.belowMinimum .label {
+  color: #1a1a1a;
+}
+
+.summaryTotal.belowMinimum .amount {
+  color: #c62828;
+}
+
+/* Checkbox mentions légales */
+.termsCheckbox {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.termsCheckbox.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: #d4af37;
+}
+
+.checkboxText {
+  color: #555;
+}
+
+.termsLink {
+  color: #d4af37;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.termsLink:hover {
+  color: #b8941f;
 }
 
 /* Loading spinner */

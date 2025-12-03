@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing'
 import { useState } from 'react'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import styles from './Header.module.css'
@@ -58,7 +58,7 @@ export const Header = ({ siteSettings }: HeaderProps) => {
           <nav className={styles.nav}>
             <Link href="/">{t('home')}</Link>
             <Link href="/tarifs">{t('pricing')}</Link>
-            <Link href="/about">{t('about')}</Link>
+            <Link href="/a-propos">{t('about')}</Link>
             <Link href="/blog">{t('blog')}</Link>
           </nav>
           
@@ -89,7 +89,7 @@ export const Header = ({ siteSettings }: HeaderProps) => {
               <Link href="/tarifs" onClick={closeMobileMenu}>
                 {t('pricing')}
               </Link>
-              <Link href="/about" onClick={closeMobileMenu}>
+              <Link href="/a-propos" onClick={closeMobileMenu}>
                 {t('about')}
               </Link>
               <Link href="/blog" onClick={closeMobileMenu}>

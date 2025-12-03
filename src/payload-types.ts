@@ -1081,9 +1081,21 @@ export interface SiteSetting {
    */
   aboutMetaDescription?: string | null;
   /**
+   * Numéro de téléphone affiché sur le site (format: +33XXXXXXXXX)
+   */
+  phoneNumber?: string | null;
+  /**
+   * Montant minimum requis pour pouvoir passer une réservation
+   */
+  minimumOrderAmount?: number | null;
+  /**
    * Pourcentage de réduction appliqué aux services supplémentaires lors d'une réservation (ex: 20 = -20%)
    */
   additionalServiceDiscount?: number | null;
+  /**
+   * Texte affiché au-dessus du champ message dans le récapitulatif du formulaire de réservation
+   */
+  messageHint?: string | null;
   /**
    * Contenu affiché sous le titre de la page Tarifs/Pricing
    */
@@ -1131,7 +1143,10 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   aboutText?: T;
   aboutMetaTitle?: T;
   aboutMetaDescription?: T;
+  phoneNumber?: T;
+  minimumOrderAmount?: T;
   additionalServiceDiscount?: T;
+  messageHint?: T;
   pricingIntroText?: T;
   pricingMetaTitle?: T;
   pricingMetaDescription?: T;

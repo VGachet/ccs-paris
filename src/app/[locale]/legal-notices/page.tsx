@@ -139,7 +139,7 @@ function renderLexicalContent(content: LexicalContent): string {
       return `<p>${children}</p>`
     }
     if (node.type === 'heading') {
-      const tag = `h${node.tag || '2'}`
+      const tag = node.tag || 'h2'
       const children = node.children?.map(renderNode).join('') || ''
       return `<${tag}>${children}</${tag}>`
     }
