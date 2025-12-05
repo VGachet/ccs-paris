@@ -109,7 +109,9 @@
     "generalTermsLink": "conditions générales",
     
     "successTitle": "Demande envoyée avec succès !",
-    "successMessage": "Nous avons bien reçu votre demande. Vous allez recevoir un email de confirmation. Notre équipe vous recontactera sous 24h avec un devis personnalisé."
+    "successMessage": "Nous avons bien reçu votre demande. Vous allez recevoir un email de confirmation. Notre équipe vous recontactera sous 24h avec un devis personnalisé.",
+    "newRequest": "Faire une autre demande",
+    "turnstileRequired": "Veuillez compléter la vérification de sécurité"
   },
   "blog": {
     "title": "Blog",

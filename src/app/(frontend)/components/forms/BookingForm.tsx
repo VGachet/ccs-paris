@@ -97,14 +97,20 @@ export const BookingForm = ({
     setError('')
 
     try {
-      // Upload photos first if any
+      // Obtenir le prochain numéro de réservation
+      const nextNumberResponse = await fetch('/api/public/bookings/next-number')
+      if (!nextNumberResponse.ok) throw new Error('Erreur lors de la génération du numéro de réservation')
+      const { nextBookingNumber } = await nextNumberResponse.json()
+
+      // Upload photos first if any (avec préfixe du numéro de réservation)
       const photoIds: string[] = []
       if (photos.length > 0) {
         for (const photo of photos) {
           const photoFormData = new FormData()
           photoFormData.append('file', photo)
+          photoFormData.append('bookingNumber', String(nextBookingNumber))
 
-          const uploadResponse = await fetch('/api/media', {
+          const uploadResponse = await fetch('/api/public/media', {
             method: 'POST',
             body: photoFormData,
           })
@@ -123,6 +129,7 @@ export const BookingForm = ({
         body: JSON.stringify({
           ...formData,
           locale,
+          bookingNumber: nextBookingNumber,
           services: selectedServices,
           photos: photoIds,
         }),

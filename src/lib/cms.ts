@@ -1,5 +1,6 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import { getCached, setCache } from './api-cache'
 
 type Locale = 'fr' | 'en' | 'all'
 
@@ -58,6 +59,10 @@ export async function getBlogPostBySlug(slug: string, locale: Locale = 'fr') {
 }
 
 export async function getServices(locale: Locale = 'fr') {
+  const cacheKey = `services:${locale}`
+  const cached = getCached<unknown[]>(cacheKey)
+  if (cached) return cached
+
   try {
     const payload = await getPayload({ config: configPromise })
     const services = await payload.find({
@@ -66,7 +71,9 @@ export async function getServices(locale: Locale = 'fr') {
       sort: 'order',
       locale,
     })
-    return services.docs || []
+    const data = services.docs || []
+    setCache(cacheKey, data)
+    return data
   } catch (error) {
     console.error('Error fetching services:', error)
     return []
@@ -74,6 +81,10 @@ export async function getServices(locale: Locale = 'fr') {
 }
 
 export async function getFeatures(locale: Locale = 'fr') {
+  const cacheKey = `features:${locale}`
+  const cached = getCached<unknown[]>(cacheKey)
+  if (cached) return cached
+
   try {
     const payload = await getPayload({ config: configPromise })
     const features = await payload.find({
@@ -87,7 +98,9 @@ export async function getFeatures(locale: Locale = 'fr') {
       limit: 50,
       locale,
     })
-    return features.docs || []
+    const data = features.docs || []
+    setCache(cacheKey, data)
+    return data
   } catch (error) {
     console.error('Error fetching features:', error)
     return []
@@ -95,12 +108,17 @@ export async function getFeatures(locale: Locale = 'fr') {
 }
 
 export async function getSiteSettings(locale: Locale = 'fr') {
+  const cacheKey = `site-settings:${locale}`
+  const cached = getCached<unknown>(cacheKey)
+  if (cached) return cached
+
   try {
     const payload = await getPayload({ config: configPromise })
     const settings = await payload.findGlobal({
       slug: 'site-settings' as any,
       locale,
     })
+    if (settings) setCache(cacheKey, settings)
     return settings || null
   } catch (error) {
     console.error('Error fetching site settings:', error)

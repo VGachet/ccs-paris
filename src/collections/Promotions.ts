@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { invalidateCache } from '@/lib/api-cache'
 
 interface PromotionData {
   id: string
@@ -125,6 +126,16 @@ export const Promotions: CollectionConfig = {
           }
         }
         return data
+      },
+    ],
+    afterChange: [
+      () => {
+        invalidateCache('promotions')
+      },
+    ],
+    afterDelete: [
+      () => {
+        invalidateCache('promotions')
       },
     ],
   },

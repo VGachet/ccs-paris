@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { invalidateCache } from '@/lib/api-cache'
 
 export const Testimonials: CollectionConfig = {
   slug: 'testimonials',
@@ -6,6 +7,18 @@ export const Testimonials: CollectionConfig = {
     useAsTitle: 'customerName',
     description: 'Avis clients pour la section "Pourquoi nous choisir"',
     defaultColumns: ['customerName', 'rating', 'isApproved', 'isActive', 'updatedAt'],
+  },
+  hooks: {
+    afterChange: [
+      () => {
+        invalidateCache('testimonials')
+      },
+    ],
+    afterDelete: [
+      () => {
+        invalidateCache('testimonials')
+      },
+    ],
   },
   fields: [
     {

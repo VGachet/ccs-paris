@@ -109,7 +109,9 @@
     "generalTermsLink": "general terms",
     
     "successTitle": "Request sent successfully!",
-    "successMessage": "We have received your request. You will receive a confirmation email. Our team will contact you within 24 hours with a personalized quote."
+    "successMessage": "We have received your request. You will receive a confirmation email. Our team will contact you within 24 hours with a personalized quote.",
+    "newRequest": "Make another request",
+    "turnstileRequired": "Please complete the security verification"
   },
   "blog": {
     "title": "Blog",

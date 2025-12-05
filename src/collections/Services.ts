@@ -1,11 +1,24 @@
 import type { CollectionConfig } from 'payload'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { invalidateCache } from '@/lib/api-cache'
 
 export const Services: CollectionConfig = {
   slug: 'services',
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'order', 'price'],
+  },
+  hooks: {
+    afterChange: [
+      () => {
+        invalidateCache('services')
+      },
+    ],
+    afterDelete: [
+      () => {
+        invalidateCache('services')
+      },
+    ],
   },
   fields: [
     {

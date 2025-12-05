@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { invalidateCache } from '@/lib/api-cache'
 
 /**
  * Collection TimeSlots - Gestion des créneaux horaires
@@ -33,6 +34,18 @@ export const TimeSlots: CollectionConfig = {
     defaultColumns: ['date', 'startTime', 'status', 'bookingId'],
     group: 'Gestion',
     description: 'Gérez les créneaux horaires disponibles pour les réservations',
+  },
+  hooks: {
+    afterChange: [
+      () => {
+        invalidateCache('time-slots')
+      },
+    ],
+    afterDelete: [
+      () => {
+        invalidateCache('time-slots')
+      },
+    ],
   },
   fields: [
     {

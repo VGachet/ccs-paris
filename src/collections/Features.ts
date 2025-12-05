@@ -1,10 +1,23 @@
 import type { CollectionConfig } from 'payload'
+import { invalidateCache } from '@/lib/api-cache'
 
 export const Features: CollectionConfig = {
   slug: 'features',
   admin: {
     useAsTitle: 'title',
     description: 'Caractéristiques pour la section "Pourquoi nous choisir"',
+  },
+  hooks: {
+    afterChange: [
+      () => {
+        invalidateCache('features')
+      },
+    ],
+    afterDelete: [
+      () => {
+        invalidateCache('features')
+      },
+    ],
   },
   fields: [
     {

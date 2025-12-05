@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import { getCached, setCache } from '@/lib/api-cache'
 
 /**
  * API pour gérer les créneaux horaires
@@ -20,6 +21,9 @@ const DEFAULT_TIME_SLOTS = [
   { startTime: '15:00', endTime: '17:00' },
   { startTime: '17:00', endTime: '19:00' },
 ]
+
+// Limiter la période à 30 jours max pour réduire la charge
+const MAX_DAYS = 30
 
 // Interface pour les créneaux
 interface TimeSlotDoc {
@@ -44,9 +48,9 @@ export async function GET(request: NextRequest) {
       ? new Date(startDateParam) 
       : new Date()
     
-    const endDate = endDateParam 
+    let endDate = endDateParam 
       ? new Date(endDateParam) 
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      : new Date(Date.now() + MAX_DAYS * 24 * 60 * 60 * 1000)
 
     // S'assurer que la date de début est au minimum aujourd'hui
     const today = new Date()
@@ -54,6 +58,20 @@ export async function GET(request: NextRequest) {
     if (startDate < today) {
       startDate.setTime(today.getTime())
     }
+
+    // Limiter la période à MAX_DAYS jours pour réduire la charge CPU
+    const maxEndDate = new Date(startDate.getTime() + MAX_DAYS * 24 * 60 * 60 * 1000)
+    if (endDate > maxEndDate) {
+      endDate = maxEndDate
+    }
+
+    // Créer une clé de cache basée sur les dates (arrondi au jour)
+    const startStr = startDate.toISOString().split('T')[0]
+    const endStr = endDate.toISOString().split('T')[0]
+    const cacheKey = `time-slots:${startStr}:${endStr}:${includeBlocked}`
+    
+    const cached = getCached<{ slots: unknown[]; period: unknown }>(cacheKey)
+    if (cached) return Response.json(cached)
 
     const payload = await getPayload({ config: configPromise })
 
@@ -148,13 +166,16 @@ export async function GET(request: NextRequest) {
       return true
     })
 
-    return Response.json({
+    const result = {
       slots: filteredSlots,
       period: {
         start: startDate.toISOString().split('T')[0],
         end: endDate.toISOString().split('T')[0],
       },
-    })
+    }
+
+    setCache(cacheKey, result)
+    return Response.json(result)
   } catch (error) {
     console.error('Error fetching time slots:', error)
     return Response.json(

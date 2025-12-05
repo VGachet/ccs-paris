@@ -355,6 +355,10 @@ export interface Blog {
  */
 export interface Booking {
   id: string;
+  /**
+   * Numéro de réservation auto-généré
+   */
+  bookingNumber?: number | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -836,6 +840,7 @@ export interface BlogSelect<T extends boolean = true> {
  * via the `definition` "bookings_select".
  */
 export interface BookingsSelect<T extends boolean = true> {
+  bookingNumber?: T;
   firstName?: T;
   lastName?: T;
   email?: T;

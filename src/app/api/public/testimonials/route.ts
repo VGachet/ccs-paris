@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { getCached, setCache } from '@/lib/api-cache'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'fr'
+
+    // Vérifier le cache
+    const cacheKey = `testimonials:${locale}`
+    const cached = getCached<unknown[]>(cacheKey)
+    if (cached) return NextResponse.json(cached)
 
     const payload = await getPayload({ config })
 
@@ -41,6 +47,7 @@ export async function GET(request: NextRequest) {
       order: testimonial.order,
     }))
 
+    setCache(cacheKey, formattedTestimonials)
     return NextResponse.json(formattedTestimonials)
   } catch (error) {
     console.error('Error fetching testimonials:', error)

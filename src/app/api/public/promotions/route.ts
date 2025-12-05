@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
+import { getCached, setCache } from '@/lib/api-cache'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -9,6 +10,11 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'fr'
+
+    // Vérifier le cache
+    const cacheKey = `promotions:${locale}`
+    const cached = getCached<{ promotion: unknown }>(cacheKey)
+    if (cached) return NextResponse.json(cached)
 
     const payload = await getPayload({ config: configPromise })
 
@@ -31,17 +37,21 @@ export async function GET(request: NextRequest) {
       const now = new Date()
       
       if (activePromo.startDate && new Date(activePromo.startDate) > now) {
-        return NextResponse.json({ promotion: null })
+        const result = { promotion: null }
+        setCache(cacheKey, result)
+        return NextResponse.json(result)
       }
       
       if (activePromo.endDate && new Date(activePromo.endDate) < now) {
-        return NextResponse.json({ promotion: null })
+        const result = { promotion: null }
+        setCache(cacheKey, result)
+        return NextResponse.json(result)
       }
     }
 
-    return NextResponse.json({ 
-      promotion: activePromo || null 
-    })
+    const result = { promotion: activePromo || null }
+    setCache(cacheKey, result)
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error fetching active promotion:', error)
     return NextResponse.json({ promotion: null }, { status: 500 })

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
+import { Turnstile } from '@marsidev/react-turnstile'
 import styles from './BookingFormV2.module.css'
 
 // =====================================================
@@ -116,6 +117,12 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
 
   // État étape 7 - Message optionnel
   const [message, setMessage] = useState('')
+
+  // Honeypot anti-bot (champ caché qui ne doit pas être rempli)
+  const [honeypot, setHoneypot] = useState('')
+
+  // Cloudflare Turnstile
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   // =====================================================
   // Chargement des données
@@ -442,18 +449,29 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       return
     }
 
+    if (!turnstileToken) {
+      setError(t('turnstileRequired'))
+      return
+    }
+
     setLoading(true)
     setError('')
 
     try {
-      // Upload des photos
+      // Obtenir le prochain numéro de réservation
+      const nextNumberResponse = await fetch('/api/public/bookings/next-number')
+      if (!nextNumberResponse.ok) throw new Error('Erreur lors de la génération du numéro de réservation')
+      const { nextBookingNumber } = await nextNumberResponse.json()
+
+      // Upload des photos avec le préfixe du numéro de réservation
       const photoIds: string[] = []
       if (photos.length > 0) {
         for (const photo of photos) {
           const photoFormData = new FormData()
           photoFormData.append('file', photo)
+          photoFormData.append('bookingNumber', String(nextBookingNumber))
 
-          const uploadResponse = await fetch('/api/media', {
+          const uploadResponse = await fetch('/api/public/media', {
             method: 'POST',
             body: photoFormData,
           })
@@ -465,7 +483,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         }
       }
 
-      // Envoi de la réservation
+      // Envoi de la réservation avec le numéro pré-généré
       const response = await fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -477,6 +495,9 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
           address: contactInfo.address,
           message,
           locale,
+          website: honeypot, // Honeypot anti-bot
+          turnstileToken, // Cloudflare Turnstile token
+          bookingNumber: nextBookingNumber, // Numéro de réservation pré-généré
           primaryService,
           secondaryServices: wantsSecondService && secondaryServices.length > 0 
             ? secondaryServices.map(s => ({
@@ -504,6 +525,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       setPhotos([])
       setActiveStep(1)
       setCompletedSteps([])
+      setTurnstileToken(null)
     } catch (_err) {
       setError(tCommon('error'))
     } finally {
@@ -927,6 +949,24 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
 
     return (
       <div className={styles.formFields}>
+        {/* Honeypot anti-bot - champ caché */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          autoComplete="off"
+          tabIndex={-1}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            opacity: 0,
+            height: 0,
+            width: 0,
+            pointerEvents: 'none',
+          }}
+        />
         <div className={styles.formRow}>
           <input
             type="text"
@@ -1198,11 +1238,25 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         </label>
       </div>
 
+      {/* Cloudflare Turnstile */}
+      <div className={styles.turnstileContainer}>
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => setTurnstileToken(null)}
+          onExpire={() => setTurnstileToken(null)}
+          options={{
+            theme: 'light',
+            language: locale === 'fr' ? 'fr' : 'en',
+          }}
+        />
+      </div>
+
       <button
         type="button"
         className={styles.submitButton}
         onClick={handleSubmit}
-        disabled={loading || !acceptedTerms || totalAmount < minimumOrderAmount}
+        disabled={loading || !acceptedTerms || totalAmount < minimumOrderAmount || !turnstileToken}
       >
         {loading ? (
           <>
@@ -1268,6 +1322,13 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             </p>
           </div>
         </div>
+        <button
+          type="button"
+          className={styles.newRequestButton}
+          onClick={() => setSuccess(false)}
+        >
+          {t('newRequest')}
+        </button>
       </div>
     )
   }

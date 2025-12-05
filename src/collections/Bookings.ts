@@ -17,12 +17,46 @@ export const Bookings: CollectionConfig = {
     delete: ({ req: { user } }) => Boolean(user),
   },
   admin: {
-    useAsTitle: 'email',
-    defaultColumns: ['email', 'firstName', 'lastName', 'status', 'totalAmount', 'createdAt'],
+    useAsTitle: 'bookingNumber',
+    defaultColumns: ['bookingNumber', 'email', 'firstName', 'lastName', 'status', 'totalAmount', 'createdAt'],
     group: 'Gestion',
     description: 'Liste des demandes de réservation reçues via le formulaire de contact',
   },
+  hooks: {
+    beforeChange: [
+      async ({ data, operation, req }) => {
+        // Générer le numéro de réservation automatiquement lors de la création
+        if (operation === 'create' && !data.bookingNumber) {
+          const payload = req.payload
+          
+          // Trouver le dernier numéro de réservation
+          const lastBooking = await payload.find({
+            collection: 'bookings',
+            sort: '-bookingNumber',
+            limit: 1,
+          })
+          
+          // Incrémenter le numéro ou commencer à 1
+          const lastNumber = lastBooking.docs[0]?.bookingNumber || 0
+          data.bookingNumber = lastNumber + 1
+        }
+        
+        return data
+      },
+    ],
+  },
   fields: [
+    {
+      name: 'bookingNumber',
+      label: 'N° de réservation',
+      type: 'number',
+      admin: {
+        position: 'sidebar',
+        readOnly: true,
+        description: 'Numéro de réservation auto-généré',
+      },
+      index: true,
+    },
     {
       name: 'firstName',
       label: 'Prénom',
