@@ -145,5 +145,24 @@
     "title": "Page introuvable",
     "description": "Cette page n'a pas pu être trouvée.",
     "backHome": "Retour à l'accueil"
+  },
+  "email": {
+    "adminSubject": "🧹 Nouvelle réservation de {name}",
+    "clientSubject": "Confirmation de votre demande - CCS Paris",
+    "thankYou": "Merci pour votre demande !",
+    "hello": "Bonjour",
+    "receivedRequest": "Nous avons bien reçu votre demande de réservation et nous vous en remercions ! Notre équipe va étudier votre demande et vous recontacter très rapidement avec un devis personnalisé.",
+    "summary": "Récapitulatif de votre demande",
+    "requestedSlots": "Créneaux souhaités",
+    "interventionAddress": "Adresse d'intervention",
+    "nextSteps": "Prochaines étapes",
+    "step1": "Nous analysons votre demande sous 24h",
+    "step2": "Nous vous envoyons un devis détaillé",
+    "step3": "Après validation, nous confirmons le créneau",
+    "step4": "Notre équipe intervient à la date convenue",
+    "question": "Une question ? N'hésitez pas à nous contacter :",
+    "estimatedTotal": "Total estimé",
+    "notSpecified": "Non spécifié",
+    "toDefine": "À définir"
   }
 }

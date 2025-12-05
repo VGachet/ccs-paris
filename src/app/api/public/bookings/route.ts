@@ -2,6 +2,18 @@ import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 
+// Import des messages de traduction
+import frMessages from '@/messages/fr.json'
+import enMessages from '@/messages/en.json'
+
+type Locale = 'fr' | 'en'
+type Messages = typeof frMessages
+
+// Fonction pour obtenir les messages selon la locale
+function getMessages(locale: Locale): Messages {
+  return locale === 'en' ? enMessages : frMessages
+}
+
 // Regex pour la validation
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const PHONE_REGEX = /^(?:(?:\+|00)33[\s.-]?|0)[1-9](?:[\s.-]?\d{2}){4}$/
@@ -39,6 +51,7 @@ interface BookingData {
   phone: string
   address: string
   message?: string
+  locale?: Locale
   // Nouveau format avec service principal et services secondaires multiples
   primaryService?: {
     serviceId: string
@@ -211,18 +224,21 @@ function generateClientEmailHtml(booking: {
   timeSlots: TimeSlotData[]
   totalAmount: number
   address: string
-}): string {
+}, locale: Locale = 'fr'): string {
+  const messages = getMessages(locale)
+  const dateLocale = locale === 'en' ? 'en-GB' : 'fr-FR'
+  
   const timeSlotsHtml = booking.timeSlots.length > 0 
     ? booking.timeSlots.map(slot => {
-        const dateFormatted = new Date(slot.date).toLocaleDateString('fr-FR', { 
+        const dateFormatted = new Date(slot.date).toLocaleDateString(dateLocale, { 
           weekday: 'long', 
           day: 'numeric', 
           month: 'long', 
           year: 'numeric' 
         })
-        return `<li style="margin: 5px 0;">${dateFormatted} de ${slot.startTime} à ${slot.endTime}</li>`
+        return `<li style="margin: 5px 0;">${dateFormatted} ${locale === 'en' ? 'from' : 'de'} ${slot.startTime} ${locale === 'en' ? 'to' : 'à'} ${slot.endTime}</li>`
       }).join('')
-    : '<li style="margin: 5px 0;">À définir</li>'
+    : `<li style="margin: 5px 0;">${messages.email.toDefine}</li>`
 
   const secondaryServicesHtml = booking.secondaryServices && booking.secondaryServices.length > 0 
     ? booking.secondaryServices.map(s => `
@@ -244,24 +260,23 @@ function generateClientEmailHtml(booking: {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmation de votre demande - CCS Paris</title>
+  <title>${messages.email.clientSubject}</title>
 </head>
 <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.7; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
   <div style="background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); padding: 40px 30px; text-align: center; border-radius: 16px 16px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">✨ Merci pour votre demande !</h1>
-    <p style="color: rgba(255,255,255,0.95); margin: 15px 0 0 0; font-size: 16px;">CCS Paris - Nettoyage Professionnel</p>
+    <h1 style="color: white; margin: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">✨ ${messages.email.thankYou}</h1>
+    <p style="color: rgba(255,255,255,0.95); margin: 15px 0 0 0; font-size: 16px;">CCS Paris - ${locale === 'en' ? 'Professional Cleaning' : 'Nettoyage Professionnel'}</p>
   </div>
   
   <div style="background: white; padding: 35px; border: 1px solid #e0e0e0; border-top: none;">
-    <p style="font-size: 17px; margin-top: 0;">Bonjour <strong>${booking.firstName}</strong>,</p>
+    <p style="font-size: 17px; margin-top: 0;">${messages.email.hello} <strong>${booking.firstName}</strong>,</p>
     
     <p style="font-size: 16px; color: #555;">
-      Nous avons bien reçu votre demande de réservation et nous vous en remercions ! 
-      Notre équipe va étudier votre demande et vous recontacter très rapidement avec un devis personnalisé.
+      ${messages.email.receivedRequest}
     </p>
     
     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 25px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #d4af37;">
-      <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 18px;">📋 Récapitulatif de votre demande</h2>
+      <h2 style="color: #1a1a1a; margin: 0 0 20px 0; font-size: 18px;">📋 ${messages.email.summary}</h2>
       
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
@@ -270,36 +285,36 @@ function generateClientEmailHtml(booking: {
         </tr>
         ${secondaryServicesHtml}
         <tr style="background: #d4af37; color: white;">
-          <td style="padding: 15px; font-weight: bold; font-size: 1.1em; border-radius: 0 0 0 8px;">Total estimé</td>
+          <td style="padding: 15px; font-weight: bold; font-size: 1.1em; border-radius: 0 0 0 8px;">${messages.email.estimatedTotal}</td>
           <td style="padding: 15px; font-weight: bold; font-size: 1.1em; text-align: right; border-radius: 0 0 8px 0;">${booking.totalAmount.toFixed(2)}€</td>
         </tr>
       </table>
     </div>
     
     <div style="background: #fff8e1; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid #ffe082;">
-      <h3 style="color: #f57c00; margin: 0 0 15px 0; font-size: 16px;">📅 Créneaux souhaités</h3>
+      <h3 style="color: #f57c00; margin: 0 0 15px 0; font-size: 16px;">📅 ${messages.email.requestedSlots}</h3>
       <ul style="margin: 0; padding-left: 20px; color: #555;">
         ${timeSlotsHtml}
       </ul>
     </div>
     
     <div style="background: #e3f2fd; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid #90caf9;">
-      <h3 style="color: #1976d2; margin: 0 0 10px 0; font-size: 16px;">📍 Adresse d'intervention</h3>
+      <h3 style="color: #1976d2; margin: 0 0 10px 0; font-size: 16px;">📍 ${messages.email.interventionAddress}</h3>
       <p style="margin: 0; color: #555;">${booking.address}</p>
     </div>
     
     <div style="background: #e8f5e9; padding: 25px; border-radius: 12px; margin: 25px 0; border: 1px solid #a5d6a7;">
-      <h3 style="color: #388e3c; margin: 0 0 15px 0; font-size: 16px;">⏳ Prochaines étapes</h3>
+      <h3 style="color: #388e3c; margin: 0 0 15px 0; font-size: 16px;">⏳ ${messages.email.nextSteps}</h3>
       <ol style="margin: 0; padding-left: 20px; color: #555;">
-        <li style="margin: 8px 0;">Nous analysons votre demande sous 24h</li>
-        <li style="margin: 8px 0;">Nous vous envoyons un devis détaillé</li>
-        <li style="margin: 8px 0;">Après validation, nous confirmons le créneau</li>
-        <li style="margin: 8px 0;">Notre équipe intervient à la date convenue</li>
+        <li style="margin: 8px 0;">${messages.email.step1}</li>
+        <li style="margin: 8px 0;">${messages.email.step2}</li>
+        <li style="margin: 8px 0;">${messages.email.step3}</li>
+        <li style="margin: 8px 0;">${messages.email.step4}</li>
       </ol>
     </div>
     
     <p style="font-size: 16px; color: #555; margin-bottom: 0;">
-      Une question ? N'hésitez pas à nous contacter :
+      ${messages.email.question}
     </p>
     <p style="margin-top: 10px;">
       📞 <a href="tel:+33651135174" style="color: #d4af37; text-decoration: none; font-weight: 600;">+33 6 51 13 51 74</a><br>
@@ -310,8 +325,8 @@ function generateClientEmailHtml(booking: {
   <div style="background: #1a1a1a; padding: 25px; text-align: center; border-radius: 0 0 16px 16px;">
     <p style="color: #d4af37; margin: 0 0 10px 0; font-weight: 600; font-size: 15px;">CCS Paris</p>
     <p style="color: #888; margin: 0; font-size: 13px;">
-      Nettoyage professionnel de canapés, tapis et textiles<br>
-      Paris et Île-de-France
+      ${locale === 'en' ? 'Professional cleaning of sofas, carpets and textiles' : 'Nettoyage professionnel de canapés, tapis et textiles'}<br>
+      Paris ${locale === 'en' ? 'and' : 'et'} Île-de-France
     </p>
   </div>
 </body>
@@ -329,6 +344,7 @@ export async function POST(request: NextRequest) {
       phone, 
       address, 
       message, 
+      locale: requestLocale,
       primaryService,
       secondaryService,
       secondaryServices,
@@ -338,6 +354,10 @@ export async function POST(request: NextRequest) {
       services, 
       photos 
     } = body as BookingData
+
+    // Déterminer la locale (par défaut 'fr')
+    const locale: Locale = requestLocale === 'en' ? 'en' : 'fr'
+    const messages = getMessages(locale)
 
     // Validation des champs obligatoires
     if (!firstName || !lastName || !email || !phone || !address) {
@@ -574,8 +594,7 @@ export async function POST(request: NextRequest) {
 
     // Configuration email
     const adminUrl = process.env.NEXT_PUBLIC_SERVER_URL || process.env.PAYLOAD_PUBLIC_SERVER_URL || 'http://localhost:3000'
-    const adminEmail = process.env.ADMIN_EMAIL || 'contact@ccs-paris.fr'
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+    const contactEmail = process.env.CCS_CONTACT_EMAIL || 'contact@ccs-paris.fr'
 
     // Préparer les données pour les emails
     const primaryServiceName = primaryServiceData?.name || (services ? 'Services multiples' : 'Service non spécifié')
@@ -585,10 +604,11 @@ export async function POST(request: NextRequest) {
 
     // Envoyer email de notification à l'admin
     try {
+      const adminSubject = messages.email.adminSubject.replace('{name}', `${firstName} ${lastName}`)
       await payload.sendEmail({
-        to: adminEmail,
-        from: fromEmail,
-        subject: `🧹 Nouvelle réservation de ${firstName} ${lastName}`,
+        to: contactEmail,
+        from: email,
+        subject: adminSubject,
         html: generateAdminEmailHtml({
           id: String(booking.id),
           firstName,
@@ -606,7 +626,7 @@ export async function POST(request: NextRequest) {
           date: new Date().toISOString(),
         }, adminUrl),
       })
-      console.log('✅ Email admin envoyé avec succès à', adminEmail)
+      console.log('✅ Email envoyé avec succès à', contactEmail)
     } catch (emailError) {
       console.error('❌ Erreur lors de l\'envoi de l\'email admin:', emailError)
     }
@@ -615,8 +635,8 @@ export async function POST(request: NextRequest) {
     try {
       await payload.sendEmail({
         to: email,
-        from: fromEmail,
-        subject: `✨ Confirmation de votre demande - CCS Paris`,
+        from: contactEmail,
+        subject: messages.email.clientSubject,
         html: generateClientEmailHtml({
           firstName,
           lastName,
@@ -627,7 +647,7 @@ export async function POST(request: NextRequest) {
           timeSlots: timeSlots || [],
           totalAmount: finalTotal,
           address,
-        }),
+        }, locale),
       })
       console.log('✅ Email client envoyé avec succès à', email)
       

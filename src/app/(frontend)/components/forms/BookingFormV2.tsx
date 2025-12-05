@@ -476,6 +476,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
           phone: contactInfo.phone,
           address: contactInfo.address,
           message,
+          locale,
           primaryService,
           secondaryServices: wantsSecondService && secondaryServices.length > 0 
             ? secondaryServices.map(s => ({

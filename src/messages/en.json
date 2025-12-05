@@ -145,5 +145,24 @@
     "title": "Page not found",
     "description": "This page could not be found.",
     "backHome": "Back to home"
+  },
+  "email": {
+    "adminSubject": "🧹 New booking from {name}",
+    "clientSubject": "Confirmation of your request - CCS Paris",
+    "thankYou": "Thank you for your request!",
+    "hello": "Hello",
+    "receivedRequest": "We have received your booking request and thank you for it! Our team will review your request and get back to you very soon with a personalized quote.",
+    "summary": "Summary of your request",
+    "requestedSlots": "Requested time slots",
+    "interventionAddress": "Service address",
+    "nextSteps": "Next steps",
+    "step1": "We review your request within 24h",
+    "step2": "We send you a detailed quote",
+    "step3": "After validation, we confirm the time slot",
+    "step4": "Our team arrives on the agreed date",
+    "question": "Have a question? Don't hesitate to contact us:",
+    "estimatedTotal": "Estimated total",
+    "notSpecified": "Not specified",
+    "toDefine": "To be defined"
   }
 }

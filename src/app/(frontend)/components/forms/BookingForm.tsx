@@ -122,6 +122,7 @@ export const BookingForm = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          locale,
           services: selectedServices,
           photos: photoIds,
         }),
