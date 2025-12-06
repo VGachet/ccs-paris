@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { checkApiRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const ip = getClientIp(request)
+  const rateLimit = checkApiRateLimit(ip)
+  
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Trop de requêtes. Veuillez réessayer dans quelques minutes.' },
+      { status: 429 }
+    )
+  }
+
   const searchParams = request.nextUrl.searchParams
   const slug = searchParams.get('slug')
   const locale = searchParams.get('locale') || 'fr'

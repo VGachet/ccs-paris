@@ -11,6 +11,9 @@
     "french": "Français",
     "english": "English"
   },
+  "about": {
+    "testimonialsTitle": "What our customers say"
+  },
   "hero": {
     "title": "Professional Sofa, Carpet, Rug and Textile Cleaning in Paris 16",
     "subtitle": "High-quality cleaning services for a fresh, healthy and spotless home",
@@ -23,7 +26,10 @@
     "sofaCleaning": "Sofa Cleaning",
     "autoSeats": "Auto Seat Cleaning",
     "other": "Other services",
-    "from": "From"
+    "from": "From",
+    "quote": "Quote on request",
+    "perM2": "per m²",
+    "minimum": "minimum"
   },
   "booking": {
     "title": "Request a Reservation",
@@ -40,6 +46,9 @@
     "selectService": "Select a service",
     "selectServices": "Select your services",
     "submit": "Send my request",
+    "requestQuote": "Request a quote",
+    "quotePrice": "Quote on request",
+    "from": "From",
     "sending": "Sending...",
     "success": "✓ Your request has been sent successfully! We will contact you within 24 hours.",
     "error": "✗ An error occurred",
@@ -140,8 +149,10 @@
     "title": "Our Pricing",
     "description": "Discover our prices for all our textile cleaning services",
     "from": "From",
+    "quotePrice": "Quote on request",
     "noServices": "No services available at the moment.",
-    "bookNow": "Book Now"
+    "bookNow": "Book Now",
+    "bookNowFull": "Book a cleaning service now"
   },
   "notFound": {
     "title": "Page not found",

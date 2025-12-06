@@ -5,6 +5,14 @@ const BOOKING_RATE_WINDOW = 60 * 1000 // 1 minute en ms
 const MEDIA_RATE_LIMIT = 10 // requêtes max
 const MEDIA_RATE_WINDOW = 60 * 1000 // 1 minute en ms
 
+// Rate limit pour les API GET publiques (plus permissif)
+const API_RATE_LIMIT = 60 // requêtes max
+const API_RATE_WINDOW = 60 * 1000 // 1 minute en ms
+
+// Rate limit pour les time-slots (protection CPU)
+const TIME_SLOTS_RATE_LIMIT = 30 // requêtes max
+const TIME_SLOTS_RATE_WINDOW = 60 * 1000 // 1 minute en ms
+
 // Store en mémoire pour le rate limiting
 interface RateLimitRecord {
   count: number
@@ -65,6 +73,24 @@ export function checkMediaRateLimit(
   ip: string
 ): { success: boolean; remaining: number } {
   return checkRateLimit(`media:${ip}`, MEDIA_RATE_LIMIT, MEDIA_RATE_WINDOW)
+}
+
+/**
+ * Vérifie le rate limit pour les API GET publiques (services, features, etc.)
+ */
+export function checkApiRateLimit(
+  ip: string
+): { success: boolean; remaining: number } {
+  return checkRateLimit(`api:${ip}`, API_RATE_LIMIT, API_RATE_WINDOW)
+}
+
+/**
+ * Vérifie le rate limit pour les time-slots (protection CPU - génération intensive)
+ */
+export function checkTimeSlotsRateLimit(
+  ip: string
+): { success: boolean; remaining: number } {
+  return checkRateLimit(`time-slots:${ip}`, TIME_SLOTS_RATE_LIMIT, TIME_SLOTS_RATE_WINDOW)
 }
 
 /**

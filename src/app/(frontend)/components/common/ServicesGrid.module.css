@@ -330,6 +330,12 @@
   border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
+.minimumOrder {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 400;
+}
+
 .loading {
   padding: 4rem 2rem;
   text-align: center;

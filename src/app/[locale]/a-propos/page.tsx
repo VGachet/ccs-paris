@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import Image from 'next/image'
-import { BookingFormV2 } from '@/app/(frontend)/components/forms/BookingFormV2'
+import { Testimonials } from '@/app/(frontend)/components/common/Testimonials'
 import type { Media } from '@/payload-types'
 import styles from './about.module.css'
 
@@ -82,11 +82,15 @@ export default async function AboutPage({ params }: Props) {
         </div>
       </section>
 
-      <section className="booking-section">
-        <BookingFormV2
-          title={t('booking.title')}
-          description={t('booking.description')}
-        />
+      <section className={styles.ctaSection}>
+        <a href={`/${locale}#booking-form`} className={styles.ctaButton}>
+          {t('pricing.bookNow')}
+        </a>
+      </section>
+
+      <section className={styles.testimonialsSection}>
+        <h2 className={styles.testimonialsTitle}>{t('about.testimonialsTitle')}</h2>
+        <Testimonials />
       </section>
     </main>
   )

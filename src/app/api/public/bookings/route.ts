@@ -503,7 +503,7 @@ export async function POST(request: NextRequest) {
       primaryServiceData = await payload.findByID({
         collection: 'services',
         id: primaryService.serviceId,
-        locale: 'fr',
+        locale,
       })
       
       const primaryPrice = primaryService.price || primaryServiceData?.price || 0
@@ -519,7 +519,7 @@ export async function POST(request: NextRequest) {
         const secServiceData = await payload.findByID({
           collection: 'services',
           id: secService.serviceId,
-          locale: 'fr',
+          locale,
         })
         
         const secPrice = secService.price || secServiceData?.price || 0
@@ -542,7 +542,7 @@ export async function POST(request: NextRequest) {
       const secondaryServiceData = await payload.findByID({
         collection: 'services',
         id: secondaryService.serviceId,
-        locale: 'fr',
+        locale,
       })
       
       const secondaryPrice = secondaryService.price || secondaryServiceData?.price || 0
@@ -569,7 +569,7 @@ export async function POST(request: NextRequest) {
           where: {
             id: { in: serviceIds },
           },
-          locale: 'fr',
+          locale,
         })
         
         const serviceNames = serviceDetails.docs.map(s => {

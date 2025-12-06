@@ -4,25 +4,6 @@ import { getCached, setCache } from './api-cache'
 
 type Locale = 'fr' | 'en' | 'all'
 
-export async function getPageData(slug: string, locale: Locale = 'fr') {
-  try {
-    const payload = await getPayload({ config: configPromise })
-    const pages = await payload.find({
-      collection: 'pages' as any,
-      where: {
-        slug: {
-          equals: slug,
-        },
-      },
-      locale,
-    })
-    return pages.docs[0] || null
-  } catch (error) {
-    console.error('Error fetching page:', error)
-    return null
-  }
-}
-
 export async function getBlogPosts(locale: Locale = 'fr') {
   try {
     const payload = await getPayload({ config: configPromise })

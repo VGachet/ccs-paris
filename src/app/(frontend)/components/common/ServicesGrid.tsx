@@ -11,15 +11,54 @@ interface MediaItem {
   alt?: string
 }
 
+// Type pour le RichText de Payload/Lexical
+interface RichTextNode {
+  type?: string
+  text?: string
+  children?: RichTextNode[]
+}
+
+interface RichTextContent {
+  root?: {
+    children?: RichTextNode[]
+  }
+}
+
+// Fonction pour extraire le texte brut du RichText
+function extractTextFromRichText(richText: RichTextContent | string | null | undefined): string {
+  if (!richText) return ''
+  if (typeof richText === 'string') return richText
+  
+  const extractText = (nodes: RichTextNode[] | undefined): string => {
+    if (!nodes) return ''
+    return nodes.map(node => {
+      if (node.text) return node.text
+      if (node.children) return extractText(node.children)
+      return ''
+    }).join(' ').trim()
+  }
+  
+  return extractText(richText.root?.children)
+}
+
 interface Service {
   id: string
   name: string
   slug: string
-  description: string
+  description: RichTextContent | string
   image?: MediaItem
   video?: MediaItem
   beforeImage?: MediaItem
   afterImage?: MediaItem
+  // Nouveaux champs de pricing
+  pricingType?: 'fixed' | 'per_m2' | 'min_price' | 'quote'
+  fixedPrice?: number
+  pricePerM2?: number
+  minimumOrder?: number
+  startingPrice?: number
+  quoteInfo?: string
+  allowQuantity?: boolean
+  // Champs legacy
   pricing?: string
   price?: number
   pricePrefix?: boolean
@@ -136,6 +175,74 @@ export function ServicesGrid() {
   const calculateDiscountedPrice = (price: number): number => {
     if (!promotion || !promotion.discountPercentage) return price
     return price * (1 - promotion.discountPercentage / 100)
+  }
+
+  // Fonction pour afficher le prix selon le type de tarification
+  const renderPricing = (service: Service) => {
+    const pricingType = service.pricingType || 'fixed'
+    
+    // Déterminer le prix à afficher et s'il y a un préfixe
+    let displayPrice: number | null = null
+    let showPrefix = false
+    let customText: string | null = null
+    let suffix = ''
+    
+    switch (pricingType) {
+      case 'fixed':
+        displayPrice = service.fixedPrice ?? service.price ?? null
+        break
+      case 'per_m2':
+        displayPrice = service.pricePerM2 ?? null
+        suffix = '/m²'
+        break
+      case 'min_price':
+        displayPrice = service.startingPrice ?? service.price ?? null
+        showPrefix = true
+        break
+      case 'quote':
+        customText = service.quoteInfo || t('quote')
+        break
+    }
+    
+    // Si c'est un devis, afficher le texte custom
+    if (pricingType === 'quote') {
+      return (
+        <p className={styles.servicePricing}>{customText}</p>
+      )
+    }
+    
+    // Si pas de prix, afficher le champ legacy pricing ou rien
+    if (displayPrice === null) {
+      if (service.pricing) {
+        return <p className={styles.servicePricing}>{service.pricing}</p>
+      }
+      return null
+    }
+    
+    // Afficher le prix avec ou sans réduction
+    return (
+      <div className={styles.priceContainer}>
+        {(showPrefix || service.pricePrefix) && (
+          <span className={styles.pricePrefix}>{t('from')}</span>
+        )}
+        {promotion && promotion.discountPercentage ? (
+          <>
+            <span className={styles.originalPrice}>{displayPrice.toFixed(2)}€{suffix}</span>
+            <span className={styles.discountedPrice}>
+              {calculateDiscountedPrice(displayPrice).toFixed(2)}€{suffix}
+            </span>
+            <span className={styles.discountBadge}>-{promotion.discountPercentage}%</span>
+          </>
+        ) : (
+          <span className={styles.servicePricing}>{displayPrice.toFixed(2)}€{suffix}</span>
+        )}
+        {pricingType === 'per_m2' && service.minimumOrder && (
+          <span className={styles.minimumOrder}>
+            (min. {service.minimumOrder}m²)
+          </span>
+        )}
+      </div>
+    )
   }
 
   if (loading) {
@@ -263,32 +370,12 @@ export function ServicesGrid() {
               ) : null}
               <div className={styles.serviceContent}>
                 <h3 className={styles.serviceName}>{service.name}</h3>
-                {service.description && (
+                {service.description && extractTextFromRichText(service.description) && (
                   <div className={styles.serviceDescription}>
-                    {service.description}
+                    {extractTextFromRichText(service.description)}
                   </div>
                 )}
-                {service.price && (
-                  <div className={styles.priceContainer}>
-                    {service.pricePrefix && (
-                      <span className={styles.pricePrefix}>{t('from')}</span>
-                    )}
-                    {promotion && promotion.discountPercentage ? (
-                      <>
-                        <span className={styles.originalPrice}>{service.price.toFixed(2)}€</span>
-                        <span className={styles.discountedPrice}>
-                          {calculateDiscountedPrice(service.price).toFixed(2)}€
-                        </span>
-                        <span className={styles.discountBadge}>-{promotion.discountPercentage}%</span>
-                      </>
-                    ) : (
-                      <span className={styles.servicePricing}>{service.price.toFixed(2)}€</span>
-                    )}
-                  </div>
-                )}
-                {!service.price && service.pricing && (
-                  <p className={styles.servicePricing}>{service.pricing}</p>
-                )}
+                {renderPricing(service)}
               </div>
             </div>
             )

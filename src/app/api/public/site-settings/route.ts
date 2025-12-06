@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { getCached, setCache } from '@/lib/api-cache'
+import { checkApiRateLimit, getClientIp } from '@/lib/rate-limit'
 
 /**
  * API pour récupérer les paramètres publics du site
@@ -10,18 +11,41 @@ import { getCached, setCache } from '@/lib/api-cache'
  * Paramètre optionnel: ?locale=fr|en pour les champs localisés
  */
 
+// Désactiver le cache Next.js pour cette route
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 const DEFAULT_MESSAGE_HINT_FR = '💡 Recommandé si : tissu fragile (soie, velours...), taches spéciales/hors normes, dimensions particulières, ou accès difficile à l\'adresse'
 const DEFAULT_MESSAGE_HINT_EN = '💡 Recommended if: delicate fabric (silk, velvet...), special/unusual stains, particular dimensions, or difficult access to address'
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rateLimit = checkApiRateLimit(ip)
+    
+    if (!rateLimit.success) {
+      return Response.json(
+        { error: 'Trop de requêtes. Veuillez réessayer dans quelques minutes.' },
+        { status: 429 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'fr'
 
     // Vérifier le cache
     const cacheKey = `site-settings-public:${locale}`
     const cached = getCached<Record<string, unknown>>(cacheKey)
-    if (cached) return Response.json(cached)
+    if (cached) {
+      return Response.json(cached, {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      })
+    }
     
     const payload = await getPayload({ config: configPromise })
 
@@ -42,7 +66,13 @@ export async function GET(request: NextRequest) {
     }
 
     setCache(cacheKey, result)
-    return Response.json(result)
+    return Response.json(result, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error) {
     console.error('Error fetching site settings:', error)
     return Response.json(

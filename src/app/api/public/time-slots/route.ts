@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { getCached, setCache } from '@/lib/api-cache'
+import { checkTimeSlotsRateLimit, getClientIp } from '@/lib/rate-limit'
 
 /**
  * API pour gérer les créneaux horaires
@@ -38,6 +39,17 @@ interface TimeSlotDoc {
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting spécifique (plus strict car génération CPU intensive)
+    const ip = getClientIp(request)
+    const rateLimit = checkTimeSlotsRateLimit(ip)
+    
+    if (!rateLimit.success) {
+      return Response.json(
+        { error: 'Trop de requêtes. Veuillez réessayer dans quelques minutes.' },
+        { status: 429 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const startDateParam = searchParams.get('startDate')
     const endDateParam = searchParams.get('endDate')
@@ -187,77 +199,21 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST: Bloquer/débloquer un créneau (admin uniquement)
+ * 
+ * ⚠️ SÉCURITÉ: Cette route est désactivée dans l'API publique.
+ * Utilisez l'interface admin Payload pour gérer les créneaux.
+ * 
  * Body:
  *   - date: Date du créneau
  *   - startTime: Heure de début
  *   - status: 'available' | 'blocked'
  *   - notes: Notes (optionnel)
  */
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { date, startTime, endTime, status, notes } = body
-
-    if (!date || !startTime || !status) {
-      return Response.json(
-        { error: 'Date, startTime et status sont requis' },
-        { status: 400 }
-      )
-    }
-
-    const payload = await getPayload({ config: configPromise })
-
-    // Chercher si le créneau existe déjà
-    const existingSlot = await (payload as any).find({
-      collection: 'time-slots',
-      where: {
-        and: [
-          { date: { equals: date } },
-          { startTime: { equals: startTime } },
-        ],
-      },
-    })
-
-    const existingDocs = existingSlot.docs as unknown as TimeSlotDoc[]
-    let result
-    if (existingDocs.length > 0) {
-      // Mettre à jour le créneau existant
-      result = await (payload as any).update({
-        collection: 'time-slots',
-        id: existingDocs[0].id,
-        data: {
-          status,
-          notes: notes || existingDocs[0].notes,
-        },
-      })
-    } else {
-      // Créer un nouveau créneau
-      const computedEndTime = endTime || (() => {
-        const hour = parseInt(startTime.split(':')[0], 10)
-        return `${String(hour + 2).padStart(2, '0')}:00`
-      })()
-
-      result = await (payload as any).create({
-        collection: 'time-slots',
-        data: {
-          date,
-          startTime,
-          endTime: computedEndTime,
-          status,
-          notes,
-        },
-      })
-    }
-
-    return Response.json({
-      success: true,
-      slot: result,
-    })
-  } catch (error) {
-    console.error('Error updating time slot:', error)
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Erreur serveur' },
-      { status: 500 }
-    )
-  }
+export async function POST(_request: NextRequest) {
+  // Cette API publique ne doit PAS permettre de modifier les créneaux
+  // Les modifications doivent passer par l'admin Payload authentifié
+  return Response.json(
+    { error: 'Non autorisé. Utilisez l\'interface admin pour gérer les créneaux.' },
+    { status: 403 }
+  )
 }

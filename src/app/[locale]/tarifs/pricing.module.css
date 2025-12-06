@@ -74,6 +74,9 @@
 
 .serviceInfo {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .serviceName {
@@ -85,11 +88,8 @@
 
 .serviceDescription {
   color: #666;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.serviceDescription p {
+  font-size: 0.9rem;
+  line-height: 1.5;
   margin: 0;
 }
 
@@ -111,14 +111,14 @@
 
 .pricePrefix {
   font-size: 0.95rem;
-  color: #666;
+  color: #333;
   font-weight: 500;
 }
 
 .price {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-primary, #1a1a1a);
+  color: var(--color-accent, #d4af37);
 }
 
 .originalPrice {
@@ -129,9 +129,9 @@
 }
 
 .discountedPrice {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #d4af37;
+  color: var(--color-accent, #d4af37);
 }
 
 .discountBadge {
@@ -145,8 +145,8 @@
 }
 
 .pricingText {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--color-accent, #d4af37);
 }
 
@@ -224,11 +224,12 @@
   }
 
   .price,
-  .discountedPrice {
-    font-size: 1.75rem;
+  .discountedPrice,
+  .pricingText {
+    font-size: 1.25rem;
   }
 
   .originalPrice {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
   }
 }

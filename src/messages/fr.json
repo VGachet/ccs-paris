@@ -11,6 +11,9 @@
     "french": "Français",
     "english": "English"
   },
+  "about": {
+    "testimonialsTitle": "Ce que disent nos clients"
+  },
   "hero": {
     "title": "Nettoyage de Canapés, Tapis, Moquettes et Textiles à Paris 16",
     "subtitle": "Services professionnels pour un intérieur propre, sain et éclatant",
@@ -23,7 +26,10 @@
     "sofaCleaning": "Nettoyage de canapé",
     "autoSeats": "Nettoyage de sièges auto",
     "other": "Autres services",
-    "from": "À partir de"
+    "from": "À partir de",
+    "quote": "Sur devis",
+    "perM2": "par m²",
+    "minimum": "minimum"
   },
   "booking": {
     "title": "Demander une réservation",
@@ -40,6 +46,9 @@
     "selectService": "Sélectionner un service",
     "selectServices": "Sélectionnez vos services",
     "submit": "Envoyer ma demande",
+    "requestQuote": "Demander un devis",
+    "quotePrice": "Sur devis",
+    "from": "À partir de",
     "sending": "Envoi en cours...",
     "success": "✓ Votre demande a été envoyée avec succès ! Nous vous contacterons sous 24h.",
     "error": "✗ Une erreur est survenue",
@@ -140,8 +149,10 @@
     "title": "Nos Tarifs",
     "description": "Découvrez nos tarifs pour tous nos services de nettoyage textile",
     "from": "À partir de",
+    "quotePrice": "Sur devis",
     "noServices": "Aucun service disponible pour le moment.",
-    "bookNow": "Réserver maintenant"
+    "bookNow": "Réserver maintenant",
+    "bookNowFull": "Réserver maintenant un service de nettoyage"
   },
   "notFound": {
     "title": "Page introuvable",

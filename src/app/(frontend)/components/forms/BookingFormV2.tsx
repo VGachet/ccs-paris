@@ -9,11 +9,51 @@ import styles from './BookingFormV2.module.css'
 // Types et Interfaces
 // =====================================================
 
+// Type pour le RichText de Payload/Lexical
+interface RichTextNode {
+  type?: string
+  text?: string
+  children?: RichTextNode[]
+}
+
+interface RichTextContent {
+  root?: {
+    children?: RichTextNode[]
+  }
+}
+
+// Fonction pour extraire le texte brut du RichText
+function extractTextFromRichText(richText: RichTextContent | string | null | undefined): string {
+  if (!richText) return ''
+  if (typeof richText === 'string') return richText
+  
+  const extractText = (nodes: RichTextNode[] | undefined): string => {
+    if (!nodes) return ''
+    return nodes.map(node => {
+      if (node.text) return node.text
+      if (node.children) return extractText(node.children)
+      return ''
+    }).join(' ').trim()
+  }
+  
+  return extractText(richText.root?.children)
+}
+
 interface Service {
   id: string
   name?: string
   title?: string
   slug: string
+  description?: RichTextContent | string
+  // Nouveaux champs de pricing
+  pricingType?: 'fixed' | 'per_m2' | 'min_price' | 'quote'
+  fixedPrice?: number
+  pricePerM2?: number
+  minimumOrder?: number
+  startingPrice?: number
+  quoteInfo?: string
+  allowQuantity?: boolean
+  // Champs legacy
   pricing?: string
   price?: number
 }
@@ -83,6 +123,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
     serviceId: string
     quantity: number
     price: number
+    pricingType: 'fixed' | 'per_m2' | 'min_price' | 'quote'
   } | null>(null)
 
   // État étape 2 - Services secondaires (multiples)
@@ -218,6 +259,72 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
     [services]
   )
 
+  // Détermine si un service de type "quote" est sélectionné
+  const hasQuoteService = useMemo(() => {
+    // Vérifier le service principal
+    if (primaryService?.pricingType === 'quote') return true
+    // Vérifier les services secondaires
+    return secondaryServices.some(s => {
+      const service = services.find(svc => svc.id === s.serviceId)
+      return service?.pricingType === 'quote'
+    })
+  }, [primaryService, secondaryServices, services])
+
+  // Fonction pour obtenir le prix d'un service selon son type
+  const getServicePrice = useCallback((service: Service): number => {
+    const pricingType = service.pricingType || 'fixed'
+    switch (pricingType) {
+      case 'fixed':
+        return service.fixedPrice ?? service.price ?? 0
+      case 'per_m2':
+        return service.pricePerM2 ?? 0
+      case 'min_price':
+        return service.startingPrice ?? service.price ?? 0
+      case 'quote':
+        return 0 // Les devis n'ont pas de prix fixe
+    }
+  }, [])
+
+  // Fonction pour obtenir l'affichage du prix d'un service
+  const getServicePriceDisplay = useCallback((service: Service): string => {
+    const pricingType = service.pricingType || 'fixed'
+    
+    switch (pricingType) {
+      case 'fixed':
+        if (service.fixedPrice) return `${service.fixedPrice.toFixed(2)}€`
+        if (service.price) return `${service.price.toFixed(2)}€`
+        break
+      case 'per_m2':
+        if (service.pricePerM2) {
+          const minText = service.minimumOrder ? ` (min. ${service.minimumOrder}m²)` : ''
+          return `${service.pricePerM2.toFixed(2)}€/m²${minText}`
+        }
+        break
+      case 'min_price':
+        if (service.startingPrice) return `${tCommon('from')} ${service.startingPrice.toFixed(2)}€`
+        if (service.price) return `${tCommon('from')} ${service.price.toFixed(2)}€`
+        break
+      case 'quote':
+        return service.quoteInfo || tCommon('quotePrice')
+    }
+    
+    return service.pricing || ''
+  }, [tCommon])
+
+  // Fonction pour obtenir le label de quantité selon le type
+  const getQuantityLabel = useCallback((service: Service): string => {
+    if (service.pricingType === 'per_m2') {
+      return 'm²'
+    }
+    return ''
+  }, [])
+
+  // Vérifie si le service autorise le choix de la quantité
+  const canSelectQuantity = useCallback((service: Service): boolean => {
+    // Par défaut true si non défini
+    return service.allowQuantity !== false
+  }, [])
+
   // Vérifier si une étape est complète
   const isStepComplete = useCallback(
     (step: number): boolean => {
@@ -268,8 +375,13 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   // =====================================================
 
   const handleSelectPrimaryService = (service: Service) => {
-    const price = service.price || 0
+    const price = getServicePrice(service)
+    const pricingType = service.pricingType || 'fixed'
+    const allowsQuantity = canSelectQuantity(service)
+    
     if (primaryService?.serviceId === service.id) {
+      // Si le service n'autorise pas la quantité, ne rien faire (déjà à 1)
+      if (!allowsQuantity) return
       // Augmenter la quantité
       setPrimaryService({
         ...primaryService,
@@ -286,12 +398,19 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         serviceId: service.id,
         quantity: 1,
         price,
+        pricingType,
       })
     }
   }
 
   const handlePrimaryQuantity = (change: number) => {
     if (!primaryService) return
+    const service = services.find(s => s.id === primaryService.serviceId)
+    if (!service) return
+    
+    // Si le service n'autorise pas la quantité, ne pas permettre d'augmenter
+    if (!canSelectQuantity(service) && change > 0 && primaryService.quantity >= 1) return
+    
     const newQty = primaryService.quantity + change
     if (newQty <= 0) {
       setPrimaryService(null)
@@ -307,16 +426,20 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   }
 
   const handleSelectSecondaryService = (service: Service) => {
-    const price = service.price || 0
+    const price = getServicePrice(service)
     const existingIndex = secondaryServices.findIndex(s => s.serviceId === service.id)
+    const allowsQuantity = canSelectQuantity(service)
     
     if (existingIndex >= 0) {
-      // Si le service existe déjà, augmenter la quantité
-      setSecondaryServices(prev => prev.map((s, i) => 
-        i === existingIndex 
-          ? { ...s, quantity: s.quantity + 1 }
-          : s
-      ))
+      // Si le service existe déjà et autorise la quantité, augmenter
+      if (allowsQuantity) {
+        setSecondaryServices(prev => prev.map((s, i) => 
+          i === existingIndex 
+            ? { ...s, quantity: s.quantity + 1 }
+            : s
+        ))
+      }
+      // Sinon, ne rien faire (déjà à 1)
     } else {
       // Ajouter un nouveau service secondaire
       setSecondaryServices(prev => [...prev, {
@@ -328,6 +451,12 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
   }
 
   const handleSecondaryQuantity = (serviceId: string, change: number) => {
+    const service = services.find(s => s.id === serviceId)
+    if (!service) return
+    
+    // Si le service n'autorise pas la quantité, ne pas permettre d'augmenter
+    if (!canSelectQuantity(service) && change > 0) return
+    
     setSecondaryServices(prev => {
       const updated = prev.map(s => {
         if (s.serviceId === serviceId) {
@@ -388,10 +517,18 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
     [getSlotsForDate]
   )
 
+  // Fonction utilitaire pour formater la date en YYYY-MM-DD sans décalage de fuseau horaire
+  const formatDateToLocalString = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const handleSelectTimeSlot = (date: Date, slot: TimeSlot) => {
     if (slot.status !== 'available') return
 
-    const dateStr = date.toISOString().split('T')[0]
+    const dateStr = formatDateToLocalString(date)
     const newSlot: SelectedTimeSlot = {
       date: dateStr,
       startTime: slot.startTime,
@@ -546,6 +683,10 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       ) : (
         services.map((service) => {
           const isSelected = primaryService?.serviceId === service.id
+          const priceDisplay = getServicePriceDisplay(service)
+          const quantityLabel = getQuantityLabel(service)
+          const allowsQuantity = canSelectQuantity(service)
+          
           return (
             <div
               key={service.id}
@@ -556,11 +697,14 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                 <span className={styles.serviceName}>
                   {service.name || service.title || 'Service'}
                 </span>
-                {service.price !== undefined && (
-                  <span className={styles.servicePrice}>{service.price.toFixed(2)}€</span>
+                {service.description && extractTextFromRichText(service.description) && (
+                  <span className={styles.serviceDescription}>{extractTextFromRichText(service.description)}</span>
+                )}
+                {priceDisplay && (
+                  <span className={styles.servicePrice}>{priceDisplay}</span>
                 )}
               </div>
-              {isSelected && primaryService && (
+              {isSelected && primaryService && allowsQuantity && (
                 <div className={styles.quantityControls}>
                   <button
                     type="button"
@@ -572,7 +716,10 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                   >
                     −
                   </button>
-                  <span className={styles.quantity}>{primaryService.quantity}</span>
+                  <span className={styles.quantity}>
+                    {primaryService.quantity}
+                    {quantityLabel}
+                  </span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -584,6 +731,9 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                     +
                   </button>
                 </div>
+              )}
+              {isSelected && primaryService && !allowsQuantity && (
+                <div className={styles.selectedIndicator}>✓</div>
               )}
             </div>
           )
@@ -661,42 +811,68 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             {secondaryServices.map((service) => {
               const serviceData = services.find(s => s.id === service.serviceId)
               const discountedPrice = service.price * discountMultiplier
+              const quantityLabel = serviceData ? getQuantityLabel(serviceData) : ''
+              const allowsQuantity = serviceData ? canSelectQuantity(serviceData) : true
+              const priceDisplay = serviceData ? getServicePriceDisplay(serviceData) : ''
+              const isQuote = serviceData?.pricingType === 'quote'
+              
               return (
                 <div key={service.serviceId} className={`${styles.serviceItem} ${styles.selected}`}>
                   <div className={styles.serviceInfo}>
                     <span className={styles.serviceName}>
                       {serviceData?.name || serviceData?.title || 'Service'}
-                      <span className={styles.discountBadge}>-{discountPercent}%</span>
+                      {!isQuote && <span className={styles.discountBadge}>-{discountPercent}%</span>}
                     </span>
-                    <span className={styles.servicePrice}>
-                      <s style={{ color: '#999', marginRight: '0.5rem' }}>
-                        {service.price.toFixed(2)}€
-                      </s>
-                      {discountedPrice.toFixed(2)}€
-                    </span>
+                    {serviceData?.description && extractTextFromRichText(serviceData.description) && (
+                      <span className={styles.serviceDescription}>{extractTextFromRichText(serviceData.description)}</span>
+                    )}
+                    {isQuote ? (
+                      <span className={styles.servicePrice}>{priceDisplay}</span>
+                    ) : (
+                      <span className={styles.servicePrice}>
+                        <s style={{ color: '#999', marginRight: '0.5rem' }}>
+                          {service.price.toFixed(2)}€
+                        </s>
+                        {discountedPrice.toFixed(2)}€
+                      </span>
+                    )}
                   </div>
-                  <div className={styles.quantityControls}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleSecondaryQuantity(service.serviceId, -1)
-                      }}
-                      className={styles.quantityButton}
-                    >
-                      −
-                    </button>
-                    <span className={styles.quantity}>{service.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleSecondaryQuantity(service.serviceId, 1)
-                      }}
-                      className={styles.quantityButton}
-                    >
-                      +
-                    </button>
+                  {allowsQuantity ? (
+                    <div className={styles.quantityControls}>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSecondaryQuantity(service.serviceId, -1)
+                        }}
+                        className={styles.quantityButton}
+                      >
+                        −
+                      </button>
+                      <span className={styles.quantity}>{service.quantity}{quantityLabel}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleSecondaryQuantity(service.serviceId, 1)
+                        }}
+                        className={styles.quantityButton}
+                      >
+                        +
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeSecondaryService(service.serviceId)
+                        }}
+                        className={styles.removeServiceButton}
+                        title={t('removeService')}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -708,7 +884,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                     >
                       ×
                     </button>
-                  </div>
+                  )}
                 </div>
               )
             })}
@@ -723,7 +899,11 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             </div>
             <div className={styles.servicesList}>
               {availableServices.map((service) => {
-                const discountedPrice = (service.price || 0) * discountMultiplier
+                const originalPrice = getServicePrice(service)
+                const discountedPrice = originalPrice * discountMultiplier
+                const priceDisplay = getServicePriceDisplay(service)
+                const isQuote = service.pricingType === 'quote'
+                
                 return (
                   <div
                     key={service.id}
@@ -733,16 +913,23 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                     <div className={styles.serviceInfo}>
                       <span className={styles.serviceName}>
                         {service.name || service.title || 'Service'}
-                        <span className={styles.discountBadge}>-{discountPercent}%</span>
+                        {!isQuote && <span className={styles.discountBadge}>-{discountPercent}%</span>}
                       </span>
-                      {service.price !== undefined && (
+                      {service.description && extractTextFromRichText(service.description) && (
+                        <span className={styles.serviceDescription}>{extractTextFromRichText(service.description)}</span>
+                      )}
+                      {isQuote ? (
+                        <span className={styles.servicePrice}>{priceDisplay}</span>
+                      ) : originalPrice > 0 ? (
                         <span className={styles.servicePrice}>
                           <s style={{ color: '#999', marginRight: '0.5rem' }}>
-                            {service.price.toFixed(2)}€
+                            {originalPrice.toFixed(2)}€
                           </s>
                           {discountedPrice.toFixed(2)}€
                         </span>
-                      )}
+                      ) : priceDisplay ? (
+                        <span className={styles.servicePrice}>{priceDisplay}</span>
+                      ) : null}
                     </div>
                     <div className={styles.addServiceIcon}>+</div>
                   </div>
@@ -874,7 +1061,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
               {getSlotsForDate(selectedDate).map((slot) => {
                 const isSlotSelected = selectedTimeSlots.some(
                   (s) =>
-                    s.date === selectedDate.toISOString().split('T')[0] &&
+                    s.date === formatDateToLocalString(selectedDate) &&
                     s.startTime === slot.startTime
                 )
                 return (
@@ -901,9 +1088,13 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
               ✅ {t('selectedSlots')} ({selectedTimeSlots.length})
             </div>
             <div className={styles.selectedSlotsList}>
-              {selectedTimeSlots.map((slot, idx) => (
+              {selectedTimeSlots.map((slot, idx) => {
+                // Parser la date sans décalage de fuseau horaire
+                const [year, month, day] = slot.date.split('-').map(Number)
+                const slotDate = new Date(year, month - 1, day)
+                return (
                 <div key={idx} className={styles.selectedSlotChip}>
-                  {new Date(slot.date).toLocaleDateString(locale, {
+                  {slotDate.toLocaleDateString(locale, {
                     day: 'numeric',
                     month: 'short',
                   })}{' '}
@@ -916,7 +1107,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                     ×
                   </button>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         )}
@@ -1132,10 +1323,14 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       {selectedTimeSlots.length > 0 && (
         <div className={styles.summaryCard}>
           <h4>📅 {t('selectedSlots')}</h4>
-          {selectedTimeSlots.map((slot, idx) => (
+          {selectedTimeSlots.map((slot, idx) => {
+            // Parser la date sans décalage de fuseau horaire
+            const [year, month, day] = slot.date.split('-').map(Number)
+            const slotDate = new Date(year, month - 1, day)
+            return (
             <div key={idx} className={styles.summaryRow}>
               <span className={styles.summaryLabel}>
-                {new Date(slot.date).toLocaleDateString(locale, {
+                {slotDate.toLocaleDateString(locale, {
                   weekday: 'long',
                   day: 'numeric',
                   month: 'long',
@@ -1145,7 +1340,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
                 {slot.startTime} - {slot.endTime}
               </span>
             </div>
-          ))}
+          )})}
         </div>
       )}
 
@@ -1193,26 +1388,28 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
       </div>
 
       {/* Total */}
-      <div className={`${styles.summaryTotal} ${totalAmount < minimumOrderAmount ? styles.belowMinimum : ''}`}>
+      <div className={`${styles.summaryTotal} ${!hasQuoteService && totalAmount < minimumOrderAmount ? styles.belowMinimum : ''}`}>
         <span className={styles.label}>{t('total')}</span>
-        <span className={styles.amount}>{totalAmount.toFixed(2)}€</span>
+        <span className={styles.amount}>
+          {hasQuoteService ? tCommon('quotePrice') : `${totalAmount.toFixed(2)}€`}
+        </span>
       </div>
 
-      {/* Avertissement minimum de commande */}
-      {totalAmount < minimumOrderAmount && (
+      {/* Avertissement minimum de commande - ne pas afficher si service de type quote */}
+      {!hasQuoteService && totalAmount < minimumOrderAmount && (
         <div className={styles.minimumWarning}>
           ⚠️ {t('minimumOrderWarning', { amount: minimumOrderAmount })}
         </div>
       )}
 
-      {/* Acceptation des mentions légales */}
-      <div className={`${styles.termsCheckbox} ${totalAmount < minimumOrderAmount ? styles.disabled : ''}`}>
+      {/* Acceptation des mentions légales - désactivé seulement si < minimum ET pas de service quote */}
+      <div className={`${styles.termsCheckbox} ${!hasQuoteService && totalAmount < minimumOrderAmount ? styles.disabled : ''}`}>
         <label className={styles.checkboxLabel}>
           <input
             type="checkbox"
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
-            disabled={totalAmount < minimumOrderAmount}
+            disabled={!hasQuoteService && totalAmount < minimumOrderAmount}
             className={styles.checkbox}
           />
           <span className={styles.checkboxText}>
@@ -1256,7 +1453,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
         type="button"
         className={styles.submitButton}
         onClick={handleSubmit}
-        disabled={loading || !acceptedTerms || totalAmount < minimumOrderAmount || !turnstileToken}
+        disabled={loading || !acceptedTerms || (!hasQuoteService && totalAmount < minimumOrderAmount) || !turnstileToken}
       >
         {loading ? (
           <>
@@ -1264,7 +1461,7 @@ export const BookingFormV2 = ({ title, description }: BookingFormV2Props) => {
             {tCommon('sending')}
           </>
         ) : (
-          <>{t('confirmBooking')}</>
+          <>{hasQuoteService ? tCommon('requestQuote') : t('confirmBooking')}</>
         )}
       </button>
     </div>

@@ -24,8 +24,15 @@ interface LexicalContent {
 interface Service {
   id: string
   name: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   description?: any
+  // Nouveaux champs de pricing
+  pricingType?: 'fixed' | 'per_m2' | 'min_price' | 'quote'
+  fixedPrice?: number
+  pricePerM2?: number
+  minimumOrder?: number
+  startingPrice?: number
+  quoteInfo?: string
+  // Champs legacy
   pricing?: string
   price?: number
   pricePrefix?: boolean
@@ -37,7 +44,6 @@ interface Promotion {
 }
 
 interface SiteSettings {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pricingIntroText?: any
 }
 
@@ -59,7 +65,6 @@ export default async function PricingPage({ params }: Props) {
 
   let services: Service[] = []
   let promotion: Promotion | null = null
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let siteSettings: any = null
 
   try {
@@ -106,14 +111,12 @@ export default async function PricingPage({ params }: Props) {
     return price * (1 - promotion.discountPercentage / 100)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderDescription = (description: any): string => {
     const lexicalContent = description as LexicalContent
     if (!lexicalContent?.root?.children) {
       return ''
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const extractText = (node: any): string => {
       if (node.type === 'text') {
         return node.text || ''
@@ -125,6 +128,46 @@ export default async function PricingPage({ params }: Props) {
     }
 
     return lexicalContent.root.children.map(extractText).join(' ')
+  }
+
+  // Fonction pour obtenir l'affichage du prix d'un service
+  const getServicePriceDisplay = (service: Service): { price: number | null; text: string; hasDiscount: boolean } => {
+    const pricingType = service.pricingType || 'fixed'
+    
+    switch (pricingType) {
+      case 'fixed':
+        if (service.fixedPrice) {
+          return { price: service.fixedPrice, text: '', hasDiscount: true }
+        }
+        break
+      case 'per_m2':
+        if (service.pricePerM2) {
+          const minText = service.minimumOrder ? ` (min. ${service.minimumOrder}m²)` : ''
+          return { price: null, text: `${service.pricePerM2.toFixed(2)}€/m²${minText}`, hasDiscount: false }
+        }
+        break
+      case 'min_price':
+        if (service.startingPrice) {
+          return { price: service.startingPrice, text: t('from'), hasDiscount: true }
+        }
+        break
+      case 'quote':
+        return { price: null, text: service.quoteInfo || t('quotePrice'), hasDiscount: false }
+    }
+    
+    // Fallback sur les champs legacy
+    if (service.price) {
+      return { 
+        price: service.price, 
+        text: service.pricePrefix ? t('from') : '', 
+        hasDiscount: true 
+      }
+    }
+    if (service.pricing) {
+      return { price: null, text: service.pricing, hasDiscount: false }
+    }
+    
+    return { price: null, text: '', hasDiscount: false }
   }
 
   return (
@@ -152,41 +195,44 @@ export default async function PricingPage({ params }: Props) {
         </div>
       ) : (
         <div className={styles.servicesList}>
-          {services.map((service) => (
-            <div key={service.id} className={styles.serviceItem}>
-              <div className={styles.serviceInfo}>
-                <h3 className={styles.serviceName}>{service.name}</h3>
-                {service.description && (
-                  <div className={styles.serviceDescription}>
-                    <p>{renderDescription(service.description)}</p>
-                  </div>
-                )}
+          {services.map((service) => {
+            const priceInfo = getServicePriceDisplay(service)
+            const descriptionText = renderDescription(service.description)
+            
+            return (
+              <div key={service.id} className={styles.serviceItem}>
+                <div className={styles.serviceInfo}>
+                  <h3 className={styles.serviceName}>{service.name}</h3>
+                  {descriptionText && (
+                    <p className={styles.serviceDescription}>{descriptionText}</p>
+                  )}
+                </div>
+                
+                <div className={styles.servicePricing}>
+                  {priceInfo.price !== null ? (
+                    <div className={styles.priceContainer}>
+                      {priceInfo.text && (
+                        <span className={styles.pricePrefix}>{priceInfo.text}</span>
+                      )}
+                      {promotion && promotion.discountPercentage && priceInfo.hasDiscount ? (
+                        <>
+                          <span className={styles.originalPrice}>{priceInfo.price.toFixed(2)}€</span>
+                          <span className={styles.discountedPrice}>
+                            {calculateDiscountedPrice(priceInfo.price).toFixed(2)}€
+                          </span>
+                          <span className={styles.discountBadge}>-{promotion.discountPercentage}%</span>
+                        </>
+                      ) : (
+                        <span className={styles.price}>{priceInfo.price.toFixed(2)}€</span>
+                      )}
+                    </div>
+                  ) : priceInfo.text ? (
+                    <span className={styles.pricingText}>{priceInfo.text}</span>
+                  ) : null}
+                </div>
               </div>
-              
-              <div className={styles.servicePricing}>
-                {service.price ? (
-                  <div className={styles.priceContainer}>
-                    {service.pricePrefix && (
-                      <span className={styles.pricePrefix}>{t('from')}</span>
-                    )}
-                    {promotion && promotion.discountPercentage ? (
-                      <>
-                        <span className={styles.originalPrice}>{service.price.toFixed(2)}€</span>
-                        <span className={styles.discountedPrice}>
-                          {calculateDiscountedPrice(service.price).toFixed(2)}€
-                        </span>
-                        <span className={styles.discountBadge}>-{promotion.discountPercentage}%</span>
-                      </>
-                    ) : (
-                      <span className={styles.price}>{service.price.toFixed(2)}€</span>
-                    )}
-                  </div>
-                ) : service.pricing ? (
-                  <span className={styles.pricingText}>{service.pricing}</span>
-                ) : null}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </main>

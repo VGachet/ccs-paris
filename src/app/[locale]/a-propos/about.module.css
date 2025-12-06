@@ -8,35 +8,47 @@
 }
 
 .contentGrid {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  align-items: start;
+  align-items: center;
 }
 
 .imageWrapper {
   width: 100%;
-  max-width: 350px;
+  max-width: 800px;
+  max-height: 300px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .imageWrapper img {
   display: block;
   border-radius: 12px;
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 .textContent {
-  padding: 1rem 0;
+  padding: 0;
+  width: 100%;
+  max-width: 900px;
 }
 
 .textContent h1 {
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   color: #333;
+  text-align: center;
 }
 
 .description {
@@ -44,7 +56,7 @@
   line-height: 1.8;
   color: #666;
   margin: 0 auto;
-  max-width: 700px;
+  max-width: 900px;
   text-align: left;
 }
 
@@ -95,10 +107,63 @@
   padding: 2rem;
 }
 
+.ctaSection {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+  border-top: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  margin: 2rem auto;
+  max-width: 1200px;
+}
+
+.ctaButton {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+}
+
+.ctaButton:hover {
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(212, 175, 55, 0.4);
+}
+
+.ctaButton:active {
+  transform: translateY(0);
+}
+
+.testimonialsSection {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.testimonialsTitle {
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
 @media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+
   .contentGrid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+
+  .imageWrapper {
+    max-width: 100%;
   }
 
   .textContent h1 {

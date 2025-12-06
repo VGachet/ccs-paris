@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { getCached, setCache } from '@/lib/api-cache'
+import { checkApiRateLimit, getClientIp } from '@/lib/rate-limit'
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = getClientIp(request)
+    const rateLimit = checkApiRateLimit(ip)
+    
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'Trop de requêtes. Veuillez réessayer dans quelques minutes.' },
+        { status: 429 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'fr'
 

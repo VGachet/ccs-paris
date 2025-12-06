@@ -10,8 +10,8 @@ interface CacheEntry<T> {
 
 const cache = new Map<string, CacheEntry<unknown>>()
 
-// TTL par défaut : 5 minutes
-const DEFAULT_TTL = 5 * 60 * 1000
+// TTL par défaut : 1 minute (réduit pour refléter plus rapidement les changements)
+const DEFAULT_TTL = 1 * 60 * 1000
 
 /**
  * Récupérer une valeur du cache

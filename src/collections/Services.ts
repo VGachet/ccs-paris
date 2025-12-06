@@ -6,17 +6,21 @@ export const Services: CollectionConfig = {
   slug: 'services',
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'order', 'price'],
+    defaultColumns: ['name', 'order', 'pricingType'],
   },
   hooks: {
     afterChange: [
-      () => {
+      ({ doc, operation }) => {
+        console.log(`📝 Service ${operation}: ${doc.name || doc.id} - Invalidation du cache...`)
         invalidateCache('services')
+        return doc
       },
     ],
     afterDelete: [
-      () => {
+      ({ doc }) => {
+        console.log(`🗑️ Service supprimé: ${doc.name || doc.id} - Invalidation du cache...`)
         invalidateCache('services')
+        return doc
       },
     ],
   },
@@ -77,18 +81,99 @@ export const Services: CollectionConfig = {
       relationTo: 'media',
       admin: { description: 'Image "Après" pour la comparaison' },
     },
+    // Configuration du choix de quantité
+    {
+      name: 'allowQuantity',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        description: 'Autoriser le choix de la quantité dans le formulaire de réservation',
+      },
+    },
+    // Type de tarification
+    {
+      name: 'pricingType',
+      type: 'select',
+      required: true,
+      defaultValue: 'fixed',
+      options: [
+        { label: 'Prix fixe', value: 'fixed' },
+        { label: 'Prix au m²', value: 'per_m2' },
+        { label: 'À partir de (prix minimum)', value: 'min_price' },
+        { label: 'Sur devis', value: 'quote' },
+      ],
+      admin: {
+        description: 'Type de tarification pour ce service',
+      },
+    },
+    // Prix fixe (pricingType = "fixed")
+    {
+      name: 'fixedPrice',
+      type: 'number',
+      min: 0,
+      admin: { 
+        description: 'Prix fixe du service en euros',
+        step: 0.01,
+        condition: (data) => data?.pricingType === 'fixed',
+      },
+    },
+    // Prix au m² (pricingType = "per_m2")
+    {
+      name: 'pricePerM2',
+      type: 'number',
+      min: 0,
+      admin: { 
+        description: 'Prix par m² en euros',
+        step: 0.01,
+        condition: (data) => data?.pricingType === 'per_m2',
+      },
+    },
+    {
+      name: 'minimumOrder',
+      type: 'number',
+      min: 0,
+      admin: { 
+        description: 'Commande minimum en m²',
+        step: 1,
+        condition: (data) => data?.pricingType === 'per_m2',
+      },
+    },
+    // Prix minimum (pricingType = "min_price")
+    {
+      name: 'startingPrice',
+      type: 'number',
+      min: 0,
+      admin: { 
+        description: 'Prix de départ en euros (affiché comme "À partir de X€")',
+        step: 0.01,
+        condition: (data) => data?.pricingType === 'min_price',
+      },
+    },
+    // Sur devis (pricingType = "quote")
+    {
+      name: 'quoteInfo',
+      type: 'text',
+      localized: true,
+      admin: { 
+        description: 'Texte personnalisé pour le devis (ex: "Prix sur devis", "Nous contacter"...)',
+        condition: (data) => data?.pricingType === 'quote',
+      },
+    },
+    // Champs legacy (pour rétrocompatibilité)
     {
       name: 'pricing',
       type: 'text',
       localized: true,
-      admin: { description: 'Informations de tarification' },
+      admin: { 
+        description: '(Déprécié) Informations de tarification - utiliser pricingType à la place',
+      },
     },
     {
       name: 'price',
       type: 'number',
       min: 0,
       admin: { 
-        description: 'Prix du service en euros (pour afficher le prix avec réduction)',
+        description: '(Déprécié) Prix du service - utiliser fixedPrice/pricePerM2/startingPrice à la place',
         step: 0.01,
       },
     },
@@ -97,7 +182,7 @@ export const Services: CollectionConfig = {
       type: 'checkbox',
       defaultValue: false,
       admin: {
-        description: 'Afficher "À partir de" avant le prix',
+        description: '(Déprécié) Utiliser pricingType = "min_price" à la place',
       },
     },
     {

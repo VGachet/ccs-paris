@@ -50,18 +50,3 @@ export async function fetchServices() {
     return []
   }
 }
-
-export async function fetchPages() {
-  const payload = await getPayload({ config: configPromise })
-  
-  try {
-    const { docs } = await payload.find({
-      collection: 'pages' as any,
-      limit: 100,
-    })
-    return docs
-  } catch (error) {
-    console.error('Error fetching pages:', error)
-    return []
-  }
-}

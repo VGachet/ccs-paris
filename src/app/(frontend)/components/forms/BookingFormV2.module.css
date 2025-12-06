@@ -296,10 +296,29 @@
   font-size: 1rem;
 }
 
+.serviceDescription {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
 .servicePrice {
   font-size: 0.95rem;
   color: #d4af37;
   font-weight: 700;
+}
+
+.selectedIndicator {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .discountBadge {

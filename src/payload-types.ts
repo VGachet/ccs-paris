@@ -69,7 +69,6 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    pages: Page;
     services: Service;
     blog: Blog;
     bookings: Booking;
@@ -86,7 +85,6 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     bookings: BookingsSelect<false> | BookingsSelect<true>;
@@ -180,61 +178,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: string;
-  title: string;
-  slug: string;
-  /**
-   * Titre SEO
-   */
-  metaTitle?: string | null;
-  /**
-   * Description SEO
-   */
-  metaDescription?: string | null;
-  /**
-   * Mots-clés séparés par virgule
-   */
-  keywords?: string | null;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  sections?:
-    | {
-        title?: string | null;
-        features?:
-          | {
-              icon?: string | null;
-              title: string;
-              description: string;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'whyChooseUs';
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */
 export interface Service {
@@ -280,15 +223,43 @@ export interface Service {
    */
   afterImage?: (string | null) | Media;
   /**
-   * Informations de tarification
+   * Autoriser le choix de la quantité dans le formulaire de réservation
+   */
+  allowQuantity?: boolean | null;
+  /**
+   * Type de tarification pour ce service
+   */
+  pricingType: 'fixed' | 'per_m2' | 'min_price' | 'quote';
+  /**
+   * Prix fixe du service en euros
+   */
+  fixedPrice?: number | null;
+  /**
+   * Prix par m² en euros
+   */
+  pricePerM2?: number | null;
+  /**
+   * Commande minimum en m²
+   */
+  minimumOrder?: number | null;
+  /**
+   * Prix de départ en euros (affiché comme "À partir de X€")
+   */
+  startingPrice?: number | null;
+  /**
+   * Texte personnalisé pour le devis (ex: "Prix sur devis", "Nous contacter"...)
+   */
+  quoteInfo?: string | null;
+  /**
+   * (Déprécié) Informations de tarification - utiliser pricingType à la place
    */
   pricing?: string | null;
   /**
-   * Prix du service en euros (pour afficher le prix avec réduction)
+   * (Déprécié) Prix du service - utiliser fixedPrice/pricePerM2/startingPrice à la place
    */
   price?: number | null;
   /**
-   * Afficher "À partir de" avant le prix
+   * (Déprécié) Utiliser pricingType = "min_price" à la place
    */
   pricePrefix?: boolean | null;
   /**
@@ -645,10 +616,6 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
-        relationTo: 'pages';
-        value: string | Page;
-      } | null)
-    | ({
         relationTo: 'services';
         value: string | Service;
       } | null)
@@ -764,40 +731,6 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
- */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  metaTitle?: T;
-  metaDescription?: T;
-  keywords?: T;
-  content?: T;
-  sections?:
-    | T
-    | {
-        whyChooseUs?:
-          | T
-          | {
-              title?: T;
-              features?:
-                | T
-                | {
-                    icon?: T;
-                    title?: T;
-                    description?: T;
-                    id?: T;
-                  };
-              id?: T;
-              blockName?: T;
-            };
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services_select".
  */
 export interface ServicesSelect<T extends boolean = true> {
@@ -809,6 +742,13 @@ export interface ServicesSelect<T extends boolean = true> {
   video?: T;
   beforeImage?: T;
   afterImage?: T;
+  allowQuantity?: T;
+  pricingType?: T;
+  fixedPrice?: T;
+  pricePerM2?: T;
+  minimumOrder?: T;
+  startingPrice?: T;
+  quoteInfo?: T;
   pricing?: T;
   price?: T;
   pricePrefix?: T;

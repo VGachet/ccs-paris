@@ -10,7 +10,6 @@ import { resendAdapter } from '@payloadcms/email-resend'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
 import { Services } from './collections/Services'
 import { Blog } from './collections/Blog'
 import { Bookings } from './collections/Bookings'
@@ -31,7 +30,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages, Services, Blog, Bookings, Features, Testimonials, LegalPages, Promotions, TimeSlots],
+  collections: [Users, Media, Services, Blog, Bookings, Features, Testimonials, LegalPages, Promotions, TimeSlots],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
